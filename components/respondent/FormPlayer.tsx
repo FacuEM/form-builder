@@ -31,13 +31,6 @@ export function FormPlayer({ form }: Props) {
     setError(null)
     const isLast = currentIndex === questions.length - 1
 
-    // Fixture mode: skip API, navigate directly
-    if (form.id === 'fixture') {
-      if (isLast) setDone(true)
-      else navigate('forward')
-      return
-    }
-
     try {
       const token = getOrCreateToken()
       const body: Record<string, unknown> = {
