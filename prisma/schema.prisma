@@ -1,0 +1,72 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Form {
+  id              String     @id @default(cuid())
+  title           String
+  creatorId       String
+  published       Boolean    @default(false)
+  thankYouMessage String     @default("Thanks for your response.")
+  questions       Question[]
+  responses       Response[]
+  createdAt       DateTime   @default(now())
+
+  @@index([creatorId])
+}
+
+model Question {
+  id      String       @id @default(cuid())
+  formId  String
+  order   Int
+  text    String
+  type    QuestionType
+  required Boolean     @default(true)
+  choices Choice[]
+  answers Answer[]
+  form    Form         @relation(fields: [formId], references: [id], onDelete: Cascade)
+}
+
+model Choice {
+  id         String   @id @default(cuid())
+  questionId String
+  label      String
+  order      Int
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+}
+
+model Response {
+  id              String   @id @default(cuid())
+  formId          String
+  respondentToken String?
+  answers         Answer[]
+  createdAt       DateTime @default(now())
+  completed       Boolean  @default(false)
+  form            Form     @relation(fields: [formId], references: [id], onDelete: Cascade)
+
+  @@unique([respondentToken, formId])
+  @@index([formId])
+  @@index([createdAt])
+}
+
+model Answer {
+  id         String   @id @default(cuid())
+  responseId String
+  questionId String
+  value      String
+  response   Response @relation(fields: [responseId], references: [id], onDelete: Cascade)
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([responseId, questionId])
+}
+
+enum QuestionType {
+  TEXT
+  LONG_TEXT
+  CHOICE
+  DROPDOWN
+}
