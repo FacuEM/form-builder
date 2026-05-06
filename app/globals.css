@@ -20,3 +20,7 @@ body {
 * {
   box-sizing: border-box;
 }
+
+button, [role="button"] {
+  cursor: pointer;
+}
