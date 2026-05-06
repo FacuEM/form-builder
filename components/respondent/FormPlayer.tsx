@@ -25,6 +25,15 @@ export function FormPlayer({ form }: Props) {
 
   async function handleSubmit(overrideValue?: string) {
     if (!currentQuestion) return
+
+    // Content-only blocks — no answer to save, just advance
+    if (currentQuestion.type === 'STATEMENT' || currentQuestion.type === 'WELCOME') {
+      const isLast = currentIndex === questions.length - 1
+      if (isLast) setDone(true)
+      else navigate('forward')
+      return
+    }
+
     const effectiveValue = overrideValue ?? currentValue
     if (currentQuestion.required && !effectiveValue.trim()) return
 

@@ -21,15 +21,16 @@ model Form {
 }
 
 model Question {
-  id      String       @id @default(cuid())
-  formId  String
-  order   Int
-  text    String
-  type    QuestionType
-  required Boolean     @default(true)
-  choices Choice[]
-  answers Answer[]
-  form    Form         @relation(fields: [formId], references: [id], onDelete: Cascade)
+  id          String       @id @default(cuid())
+  formId      String
+  order       Int
+  text        String
+  description String?
+  type        QuestionType
+  required    Boolean      @default(true)
+  choices     Choice[]
+  answers     Answer[]
+  form        Form         @relation(fields: [formId], references: [id], onDelete: Cascade)
 }
 
 model Choice {
@@ -70,4 +71,6 @@ enum QuestionType {
   LONG_TEXT
   CHOICE
   DROPDOWN
+  STATEMENT
+  WELCOME
 }

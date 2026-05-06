@@ -15,9 +15,13 @@ const TYPES = [
   { value: 'LONG_TEXT', label: 'Long text' },
   { value: 'CHOICE', label: 'Choice' },
   { value: 'DROPDOWN', label: 'Dropdown' },
+  { value: 'STATEMENT', label: 'Title' },
+  { value: 'WELCOME', label: 'Introduction' },
 ] as const
 
 type QuestionType = (typeof TYPES)[number]['value']
+
+const CONTENT_ONLY_TYPES = new Set(['STATEMENT', 'WELCOME'])
 
 interface Props {
   question: Question
@@ -29,8 +33,8 @@ export function QuestionEditor({ question, formId }: Props) {
 
   function handleTypeChange(type: QuestionType) {
     const hasChoices = question.choices.length > 0
-    const switchingToText = type === 'TEXT' || type === 'LONG_TEXT'
-    if (hasChoices && switchingToText) {
+    const switchingToNonChoice = type === 'TEXT' || type === 'LONG_TEXT' || CONTENT_ONLY_TYPES.has(type)
+    if (hasChoices && switchingToNonChoice) {
       setConfirmTypeSwitch(type)
       return
     }
@@ -39,9 +43,11 @@ export function QuestionEditor({ question, formId }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      {/* Question text */}
+      {/* Text field */}
       <div>
-        <label className="text-white/40 text-xs uppercase tracking-wider mb-2 block">Question</label>
+        <label className="text-white/40 text-xs uppercase tracking-wider mb-2 block">
+          {question.type === 'WELCOME' ? 'Title' : question.type === 'STATEMENT' ? 'Content' : 'Question'}
+        </label>
         <textarea
           defaultValue={question.text}
           onBlur={(e) => updateQuestion(question.id, formId, { text: e.target.value })}
@@ -49,6 +55,20 @@ export function QuestionEditor({ question, formId }: Props) {
           className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1.5 focus:border-white/60 transition-colors resize-none"
         />
       </div>
+
+      {/* Description field — only for WELCOME */}
+      {question.type === 'WELCOME' && (
+        <div>
+          <label className="text-white/40 text-xs uppercase tracking-wider mb-2 block">Description</label>
+          <textarea
+            defaultValue={question.description ?? ''}
+            onBlur={(e) => updateQuestion(question.id, formId, { description: e.target.value })}
+            rows={3}
+            placeholder="Optional subtitle or instructions..."
+            className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1.5 focus:border-white/60 transition-colors resize-none placeholder:text-white/20"
+          />
+        </div>
+      )}
 
       {/* Type picker */}
       <div>
@@ -95,7 +115,7 @@ export function QuestionEditor({ question, formId }: Props) {
         )}
       </div>
 
-      {/* Choices list */}
+      {/* Choices list — hidden for content-only types */}
       {(question.type === 'CHOICE' || question.type === 'DROPDOWN') && (
         <div>
           <label className="text-white/40 text-xs uppercase tracking-wider mb-2 block">Options</label>
@@ -128,22 +148,24 @@ export function QuestionEditor({ question, formId }: Props) {
         </div>
       )}
 
-      {/* Required toggle */}
-      <div className="flex items-center justify-between">
-        <p className="text-white/70 text-sm">Required</p>
-        <button
-          onClick={() => updateQuestion(question.id, formId, { required: !question.required })}
-          className={`w-11 h-6 rounded-full transition-colors relative ${
-            question.required ? 'bg-white' : 'bg-white/20'
-          }`}
-        >
-          <span
-            className={`absolute top-1 w-4 h-4 rounded-full transition-all ${
-              question.required ? 'left-6 bg-black' : 'left-1 bg-white/60'
+      {/* Required toggle — hidden for content-only types */}
+      {!CONTENT_ONLY_TYPES.has(question.type) && (
+        <div className="flex items-center justify-between">
+          <p className="text-white/70 text-sm">Required</p>
+          <button
+            onClick={() => updateQuestion(question.id, formId, { required: !question.required })}
+            className={`w-11 h-6 rounded-full transition-colors relative ${
+              question.required ? 'bg-white' : 'bg-white/20'
             }`}
-          />
-        </button>
-      </div>
+          >
+            <span
+              className={`absolute top-1 w-4 h-4 rounded-full transition-all ${
+                question.required ? 'left-6 bg-black' : 'left-1 bg-white/60'
+              }`}
+            />
+          </button>
+        </div>
+      )}
     </div>
   )
 }

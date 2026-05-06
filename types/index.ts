@@ -1,4 +1,4 @@
-export type QuestionType = 'TEXT' | 'LONG_TEXT' | 'CHOICE' | 'DROPDOWN'
+export type QuestionType = 'TEXT' | 'LONG_TEXT' | 'CHOICE' | 'DROPDOWN' | 'STATEMENT' | 'WELCOME'
 
 export interface Choice {
   id: string
@@ -12,6 +12,7 @@ export interface Question {
   formId: string
   order: number
   text: string
+  description?: string | null
   type: QuestionType
   required: boolean
   choices: Choice[]
