@@ -78,7 +78,7 @@ export async function moveQuestion(questionId: string, formId: string, dir: 'up'
   const user = await getUser()
   await prisma.form.findFirstOrThrow({ where: { id: formId, creatorId: user.id } })
   const questions = await prisma.question.findMany({ where: { formId }, orderBy: { order: 'asc' } })
-  const idx = questions.findIndex((q) => q.id === questionId)
+  const idx = questions.findIndex((q: { id: string }) => q.id === questionId)
   const swapIdx = dir === 'up' ? idx - 1 : idx + 1
   if (swapIdx < 0 || swapIdx >= questions.length) return
   const a = questions[idx]
