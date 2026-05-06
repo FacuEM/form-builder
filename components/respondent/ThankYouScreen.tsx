@@ -1,6 +1,8 @@
 'use client'
 
+import { useEffect } from 'react'
 import { motion } from 'framer-motion'
+import confetti from 'canvas-confetti'
 
 interface Props {
   title: string
@@ -8,6 +10,14 @@ interface Props {
 }
 
 export function ThankYouScreen({ title, description }: Props) {
+  useEffect(() => {
+    confetti({
+      particleCount: 120,
+      spread: 80,
+      origin: { y: 0.6 },
+    })
+  }, [])
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
