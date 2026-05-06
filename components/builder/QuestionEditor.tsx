@@ -9,12 +9,11 @@ const TYPES = [
   { value: 'CHOICE', label: 'Choice' },
   { value: 'DROPDOWN', label: 'Dropdown' },
   { value: 'STATEMENT', label: 'Title' },
-  { value: 'WELCOME', label: 'Introduction' },
 ] as const
 
 type QuestionType = (typeof TYPES)[number]['value']
 
-const CONTENT_ONLY_TYPES = new Set<QuestionType>(['STATEMENT', 'WELCOME'])
+const CONTENT_ONLY_TYPES = new Set<QuestionType>(['STATEMENT'])
 
 interface Props {
   question: Question
@@ -58,7 +57,7 @@ export function QuestionEditor({
       {/* Text field */}
       <div>
         <label className="text-white/40 text-xs uppercase tracking-wider mb-2 block">
-          {localType === 'WELCOME' ? 'Title' : localType === 'STATEMENT' ? 'Content' : 'Question'}
+          {localType === 'STATEMENT' ? 'Content' : 'Question'}
         </label>
         <textarea
           key={question.id}
@@ -68,21 +67,6 @@ export function QuestionEditor({
           className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1.5 focus:border-white/60 transition-colors resize-none"
         />
       </div>
-
-      {/* Description field — only for WELCOME */}
-      {localType === 'WELCOME' && (
-        <div>
-          <label className="text-white/40 text-xs uppercase tracking-wider mb-2 block">Description</label>
-          <textarea
-            key={`${question.id}-desc`}
-            defaultValue={question.description ?? ''}
-            onBlur={(e) => onUpdateQuestion(question.id, { description: e.target.value })}
-            rows={3}
-            placeholder="Optional subtitle or instructions..."
-            className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1.5 focus:border-white/60 transition-colors resize-none placeholder:text-white/20"
-          />
-        </div>
-      )}
 
       {/* Type picker */}
       <div>

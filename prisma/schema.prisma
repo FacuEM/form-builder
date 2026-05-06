@@ -8,14 +8,19 @@ generator client {
 }
 
 model Form {
-  id              String     @id @default(cuid())
-  title           String
-  creatorId       String
-  published       Boolean    @default(false)
-  thankYouMessage String     @default("Thanks for your response.")
-  questions       Question[]
-  responses       Response[]
-  createdAt       DateTime   @default(now())
+  id                   String     @id @default(cuid())
+  title                String
+  creatorId            String
+  published            Boolean    @default(false)
+  welcomeEnabled       Boolean    @default(true)
+  welcomeTitle         String     @default("Welcome")
+  welcomeDescription   String?
+  thankYouEnabled      Boolean    @default(true)
+  thankYouTitle        String     @default("Thank you!")
+  thankYouMessage      String     @default("Your response has been recorded.")
+  questions            Question[]
+  responses            Response[]
+  createdAt            DateTime   @default(now())
 
   @@index([creatorId])
 }

@@ -30,7 +30,16 @@ export async function createForm() {
   redirect(`/dashboard/forms/${form.id}/edit`)
 }
 
-export async function updateForm(formId: string, data: { title?: string; published?: boolean; thankYouMessage?: string }) {
+export async function updateForm(formId: string, data: {
+  title?: string
+  published?: boolean
+  welcomeEnabled?: boolean
+  welcomeTitle?: string
+  welcomeDescription?: string
+  thankYouEnabled?: boolean
+  thankYouTitle?: string
+  thankYouMessage?: string
+}) {
   const user = await getUser()
   await prisma.form.update({ where: { id: formId, creatorId: user.id }, data })
 }

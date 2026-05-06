@@ -1,6 +1,6 @@
 'use client'
 
-import { AnimatePresence } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { useState } from 'react'
 import type { Form } from '@/types'
 import { useRespondentState } from '@/hooks/useRespondentState'
@@ -12,11 +12,14 @@ interface Props {
   form: Form
 }
 
+type Stage = 'welcome' | 'questions' | 'done'
+
 export function FormPlayer({ form }: Props) {
   const questions = form.questions
+  const initialStage: Stage = form.welcomeEnabled ? 'welcome' : 'questions'
+  const [stage, setStage] = useState<Stage>(initialStage)
   const { currentIndex, direction, answers, navigate, setAnswer, submitting } =
     useRespondentState(questions.length)
-  const [done, setDone] = useState(false)
   const [responseId, setResponseId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -26,11 +29,13 @@ export function FormPlayer({ form }: Props) {
   async function handleSubmit(overrideValue?: string) {
     if (!currentQuestion) return
 
-    // Content-only blocks — no answer to save, just advance
     if (currentQuestion.type === 'STATEMENT' || currentQuestion.type === 'WELCOME') {
       const isLast = currentIndex === questions.length - 1
-      if (isLast) setDone(true)
-      else navigate('forward')
+      if (isLast) {
+        if (form.thankYouEnabled) setStage('done')
+      } else {
+        navigate('forward')
+      }
       return
     }
 
@@ -59,15 +64,47 @@ export function FormPlayer({ form }: Props) {
       const data = await res.json()
       if (!responseId) setResponseId(data.responseId)
 
-      if (isLast) setDone(true)
-      else navigate('forward')
+      if (isLast) {
+        if (form.thankYouEnabled) setStage('done')
+      } else {
+        navigate('forward')
+      }
     } catch {
       setError('Something went wrong. Please try again.')
     }
   }
 
-  if (done) {
-    return <ThankYouScreen message={form.thankYouMessage} />
+  if (stage === 'done') {
+    return (
+      <ThankYouScreen
+        title={form.thankYouTitle}
+        description={form.thankYouMessage || undefined}
+      />
+    )
+  }
+
+  if (stage === 'welcome') {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+        className="min-h-screen bg-[#080808] flex items-center justify-center px-6"
+      >
+        <div className="max-w-xl w-full">
+          <h1 className="text-white text-4xl font-light mb-4 leading-tight">{form.welcomeTitle}</h1>
+          {form.welcomeDescription && (
+            <p className="text-white/50 text-lg font-light mb-10 leading-relaxed">{form.welcomeDescription}</p>
+          )}
+          <button
+            onClick={() => setStage('questions')}
+            className="mt-8 px-8 py-3.5 bg-white text-black font-medium rounded-lg hover:bg-white/90 transition-colors"
+          >
+            Start →
+          </button>
+        </div>
+      </motion.div>
+    )
   }
 
   return (

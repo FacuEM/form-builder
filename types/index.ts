@@ -23,6 +23,11 @@ export interface Form {
   title: string
   creatorId: string
   published: boolean
+  welcomeEnabled: boolean
+  welcomeTitle: string
+  welcomeDescription?: string | null
+  thankYouEnabled: boolean
+  thankYouTitle: string
   thankYouMessage: string
   questions: Question[]
 }
