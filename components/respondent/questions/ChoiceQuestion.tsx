@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import type { Question } from '@/types'
+import { detectTouchDevice } from '@/lib/touchDetect'
 
 interface Props {
   question: Question
@@ -19,7 +20,7 @@ export function ChoiceQuestion({ question, value, onChange, onSubmit, disabled }
   const [isTouchDevice, setIsTouchDevice] = useState(false)
 
   useEffect(() => {
-    setIsTouchDevice('ontouchstart' in window || window.matchMedia('(pointer: coarse)').matches)
+    setIsTouchDevice(detectTouchDevice())
   }, [])
 
   useEffect(() => {

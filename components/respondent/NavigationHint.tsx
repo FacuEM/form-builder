@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import { useEffect, useState } from 'react'
+import { detectTouchDevice } from '@/lib/touchDetect'
 
 interface Props {
   onContinue: (value?: string) => void
@@ -13,7 +14,7 @@ export function NavigationHint({ onContinue, disabled }: Props) {
   const [isTouchDevice, setIsTouchDevice] = useState(false)
 
   useEffect(() => {
-    setIsTouchDevice('ontouchstart' in window || window.matchMedia('(pointer: coarse)').matches)
+    setIsTouchDevice(detectTouchDevice())
   }, [])
 
   useEffect(() => {
