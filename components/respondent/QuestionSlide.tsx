@@ -65,7 +65,7 @@ export function QuestionSlide({
       {question.type === 'DROPDOWN' && (
         <DropdownQuestion question={question} value={value} onChange={onChange} onSubmit={onSubmit} disabled={submitting} />
       )}
-      {question.type !== 'DROPDOWN' && question.type !== 'STATEMENT' && (
+      {question.type !== 'STATEMENT' && (
         <NavigationHint onContinue={onSubmit} disabled={submitting} />
       )}
     </motion.div>

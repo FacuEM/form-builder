@@ -1,5 +1,5 @@
-import { render, screen, fireEvent, act } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
 import { DropdownQuestion } from './DropdownQuestion'
 
 const question = {
@@ -17,61 +17,43 @@ const question = {
 }
 
 describe('DropdownQuestion', () => {
-  beforeEach(() => {
-    vi.useFakeTimers()
+  it('renders a trigger button with placeholder text', () => {
+    render(<DropdownQuestion question={question} value="" onChange={vi.fn()} onSubmit={vi.fn()} />)
+    expect(screen.getByRole('button', { name: /select an option/i })).toBeInTheDocument()
   })
 
-  afterEach(() => {
-    vi.useRealTimers()
-  })
-
-  it('renders a select with all choices', () => {
-    render(
-      <DropdownQuestion question={question} value="" onChange={vi.fn()} onSubmit={vi.fn()} />
-    )
-    expect(screen.getByRole('combobox')).toBeInTheDocument()
+  it('opens the list when trigger is clicked', () => {
+    render(<DropdownQuestion question={question} value="" onChange={vi.fn()} onSubmit={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: /select an option/i }))
     expect(screen.getByText('USA')).toBeInTheDocument()
     expect(screen.getByText('Canada')).toBeInTheDocument()
   })
 
-  it('calls onChange when selection changes', () => {
+  it('calls onChange when an option is clicked', () => {
     const onChange = vi.fn()
-    render(
-      <DropdownQuestion question={question} value="" onChange={onChange} onSubmit={vi.fn()} />
-    )
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'USA' } })
+    render(<DropdownQuestion question={question} value="" onChange={onChange} onSubmit={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: /select an option/i }))
+    fireEvent.click(screen.getByText('USA'))
     expect(onChange).toHaveBeenCalledWith('USA')
   })
 
-  it('calls onSubmit with the selected value after 300ms', () => {
-    const onSubmit = vi.fn()
-    render(
-      <DropdownQuestion question={question} value="" onChange={vi.fn()} onSubmit={onSubmit} />
-    )
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'Canada' } })
-    expect(onSubmit).not.toHaveBeenCalled()
-    act(() => { vi.advanceTimersByTime(300) })
-    expect(onSubmit).toHaveBeenCalledWith('Canada')
+  it('closes the list after selecting an option', async () => {
+    render(<DropdownQuestion question={question} value="" onChange={vi.fn()} onSubmit={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: /select an option/i }))
+    fireEvent.click(screen.getByText('Canada'))
+    await waitFor(() => expect(screen.queryByRole('list')).not.toBeInTheDocument())
   })
 
-  it('does not call onSubmit before 300ms', () => {
+  it('does not call onSubmit automatically after selecting', () => {
     const onSubmit = vi.fn()
-    render(
-      <DropdownQuestion question={question} value="" onChange={vi.fn()} onSubmit={onSubmit} />
-    )
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'USA' } })
-    act(() => { vi.advanceTimersByTime(299) })
+    render(<DropdownQuestion question={question} value="" onChange={vi.fn()} onSubmit={onSubmit} />)
+    fireEvent.click(screen.getByRole('button', { name: /select an option/i }))
+    fireEvent.click(screen.getByText('USA'))
     expect(onSubmit).not.toHaveBeenCalled()
   })
 
-  it('clears the timer on unmount (no state update on unmounted component)', () => {
-    const onSubmit = vi.fn()
-    const { unmount } = render(
-      <DropdownQuestion question={question} value="" onChange={vi.fn()} onSubmit={onSubmit} />
-    )
-    fireEvent.change(screen.getByRole('combobox'), { target: { value: 'USA' } })
-    unmount()
-    act(() => { vi.advanceTimersByTime(300) })
-    expect(onSubmit).not.toHaveBeenCalled()
+  it('shows selected value in trigger after selection', () => {
+    render(<DropdownQuestion question={question} value="Canada" onChange={vi.fn()} onSubmit={vi.fn()} />)
+    expect(screen.getByText('Canada')).toBeInTheDocument()
   })
 })
