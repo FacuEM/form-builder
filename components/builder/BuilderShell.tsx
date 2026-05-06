@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { QuestionList } from './QuestionList'
 import { QuestionEditor } from './QuestionEditor'
@@ -18,6 +18,17 @@ type Tab = 'questions' | 'settings'
 export function BuilderShell({ form, hasResponses, createQuestion }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(form.questions[0]?.id ?? null)
   const [tab, setTab] = useState<Tab>('questions')
+
+  // Auto-select newly created questions
+  const seenIds = useRef(new Set(form.questions.map((q) => q.id)))
+  useEffect(() => {
+    const newQ = form.questions.find((q) => !seenIds.current.has(q.id))
+    if (newQ) {
+      setSelectedId(newQ.id)
+      setTab('questions')
+    }
+    seenIds.current = new Set(form.questions.map((q) => q.id))
+  }, [form.questions])
 
   const selectedQuestion = form.questions.find((q) => q.id === selectedId) ?? null
 

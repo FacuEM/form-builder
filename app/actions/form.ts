@@ -12,6 +12,13 @@ async function getUser() {
   return user
 }
 
+export async function deleteForm(formId: string) {
+  const user = await getUser()
+  await prisma.form.delete({ where: { id: formId, creatorId: user.id } })
+  revalidatePath('/dashboard')
+  redirect('/dashboard')
+}
+
 export async function createForm() {
   const user = await getUser()
   const form = await prisma.form.create({

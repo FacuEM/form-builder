@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/db'
 import { createForm } from '@/app/actions/form'
 import { signOut } from '@/app/actions/auth'
-import Link from 'next/link'
+import { FormsList } from '@/components/builder/FormsList'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -41,32 +41,7 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {forms.length === 0 ? (
-          <p className="text-white/30 text-sm">No forms yet. Create one to get started.</p>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {forms.map((form) => (
-              <Link
-                key={form.id}
-                href={`/dashboard/forms/${form.id}/edit`}
-                className="flex items-center justify-between px-4 py-4 rounded-xl border border-white/10 hover:border-white/25 hover:bg-white/3 transition-all group"
-              >
-                <div>
-                  <p className="text-white text-sm font-medium">{form.title}</p>
-                  <p className="text-white/30 text-xs mt-0.5">
-                    {form._count.responses} response{form._count.responses !== 1 ? 's' : ''} ·{' '}
-                    {form.published ? (
-                      <span className="text-green-400/60">Published</span>
-                    ) : (
-                      <span>Draft</span>
-                    )}
-                  </p>
-                </div>
-                <span className="text-white/20 group-hover:text-white/50 transition-colors">→</span>
-              </Link>
-            ))}
-          </div>
-        )}
+        <FormsList forms={forms} />
       </div>
     </div>
   )
