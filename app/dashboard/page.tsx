@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/db'
 import { createForm } from '@/app/actions/form'
+import { signOut } from '@/app/actions/auth'
 import Link from 'next/link'
 
 export default async function DashboardPage() {
@@ -20,14 +21,24 @@ export default async function DashboardPage() {
       <div className="max-w-3xl mx-auto">
         <div className="flex items-center justify-between mb-10">
           <h1 className="text-white text-2xl font-light">Your forms</h1>
-          <form action={createForm}>
-            <button
-              type="submit"
-              className="px-5 py-2.5 bg-white text-black text-sm font-medium rounded-lg hover:bg-white/90 transition-colors"
-            >
-              + New form
-            </button>
-          </form>
+          <div className="flex items-center gap-3">
+            <form action={createForm}>
+              <button
+                type="submit"
+                className="px-5 py-2.5 bg-white text-black text-sm font-medium rounded-lg hover:bg-white/90 transition-colors"
+              >
+                + New form
+              </button>
+            </form>
+            <form action={signOut}>
+              <button
+                type="submit"
+                className="px-4 py-2.5 text-white/40 hover:text-white text-sm transition-colors"
+              >
+                Sign out
+              </button>
+            </form>
+          </div>
         </div>
 
         {forms.length === 0 ? (

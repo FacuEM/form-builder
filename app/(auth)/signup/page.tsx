@@ -35,8 +35,18 @@ export default function SignupPage() {
   if (done) {
     return (
       <div className="min-h-screen bg-[#080808] flex items-center justify-center px-6">
-        <div className="w-full max-w-sm text-center">
+        <div className="w-full max-w-sm text-center flex flex-col gap-4">
           <p className="text-white text-xl font-light">Check your email to confirm your account.</p>
+          <p className="text-white/40 text-sm">
+            Click the link in the email, then{' '}
+            <a href="/login" className="text-white/70 hover:text-white underline">
+              sign in
+            </a>
+            .
+          </p>
+          <p className="text-white/25 text-xs">
+            No email? Check spam, or disable email confirmation in Supabase Auth settings for local dev.
+          </p>
         </div>
       </div>
     )
