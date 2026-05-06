@@ -1,7 +1,6 @@
 import { notFound, redirect } from 'next/navigation'
 import { prisma } from '@/lib/db'
 import { createClient } from '@/lib/supabase/server'
-import { createQuestion } from '@/app/actions/form'
 import { BuilderShell } from '@/components/builder/BuilderShell'
 
 interface Props {
@@ -23,5 +22,5 @@ export default async function EditPage({ params }: Props) {
 
   const hasResponses = await prisma.response.count({ where: { formId: id } })
 
-  return <BuilderShell form={form as never} hasResponses={hasResponses > 0} createQuestion={createQuestion.bind(null, id)} />
+  return <BuilderShell form={form as never} hasResponses={hasResponses > 0} />
 }

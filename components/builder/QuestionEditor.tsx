@@ -1,13 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import {
-  updateQuestion,
-  updateQuestionType,
-  createChoice,
-  updateChoice,
-  deleteChoice,
-} from '@/app/actions/form'
+import { useState, useEffect } from 'react'
 import type { Question } from '@/types'
 
 const TYPES = [
@@ -21,15 +14,33 @@ const TYPES = [
 
 type QuestionType = (typeof TYPES)[number]['value']
 
-const CONTENT_ONLY_TYPES = new Set(['STATEMENT', 'WELCOME'])
+const CONTENT_ONLY_TYPES = new Set<QuestionType>(['STATEMENT', 'WELCOME'])
 
 interface Props {
   question: Question
-  formId: string
+  onUpdateQuestion: (id: string, data: { text?: string; description?: string; required?: boolean }) => void
+  onUpdateQuestionType: (id: string, type: Question['type'], deleteChoices: boolean) => void
+  onCreateChoice: (questionId: string) => void
+  onUpdateChoice: (choiceId: string, questionId: string, label: string) => void
+  onDeleteChoice: (choiceId: string, questionId: string) => void
 }
 
-export function QuestionEditor({ question, formId }: Props) {
+export function QuestionEditor({
+  question,
+  onUpdateQuestion,
+  onUpdateQuestionType,
+  onCreateChoice,
+  onUpdateChoice,
+  onDeleteChoice,
+}: Props) {
+  const [localType, setLocalType] = useState<QuestionType>(question.type as QuestionType)
   const [confirmTypeSwitch, setConfirmTypeSwitch] = useState<QuestionType | null>(null)
+
+  // Sync localType when a different question is selected
+  useEffect(() => {
+    setLocalType(question.type as QuestionType)
+    setConfirmTypeSwitch(null)
+  }, [question.id, question.type])
 
   function handleTypeChange(type: QuestionType) {
     const hasChoices = question.choices.length > 0
@@ -38,7 +49,8 @@ export function QuestionEditor({ question, formId }: Props) {
       setConfirmTypeSwitch(type)
       return
     }
-    updateQuestionType(question.id, formId, type, false)
+    setLocalType(type)
+    onUpdateQuestionType(question.id, type, false)
   }
 
   return (
@@ -46,23 +58,25 @@ export function QuestionEditor({ question, formId }: Props) {
       {/* Text field */}
       <div>
         <label className="text-white/40 text-xs uppercase tracking-wider mb-2 block">
-          {question.type === 'WELCOME' ? 'Title' : question.type === 'STATEMENT' ? 'Content' : 'Question'}
+          {localType === 'WELCOME' ? 'Title' : localType === 'STATEMENT' ? 'Content' : 'Question'}
         </label>
         <textarea
+          key={question.id}
           defaultValue={question.text}
-          onBlur={(e) => updateQuestion(question.id, formId, { text: e.target.value })}
+          onBlur={(e) => onUpdateQuestion(question.id, { text: e.target.value })}
           rows={3}
           className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1.5 focus:border-white/60 transition-colors resize-none"
         />
       </div>
 
       {/* Description field — only for WELCOME */}
-      {question.type === 'WELCOME' && (
+      {localType === 'WELCOME' && (
         <div>
           <label className="text-white/40 text-xs uppercase tracking-wider mb-2 block">Description</label>
           <textarea
+            key={`${question.id}-desc`}
             defaultValue={question.description ?? ''}
-            onBlur={(e) => updateQuestion(question.id, formId, { description: e.target.value })}
+            onBlur={(e) => onUpdateQuestion(question.id, { description: e.target.value })}
             rows={3}
             placeholder="Optional subtitle or instructions..."
             className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1.5 focus:border-white/60 transition-colors resize-none placeholder:text-white/20"
@@ -79,7 +93,7 @@ export function QuestionEditor({ question, formId }: Props) {
               key={t.value}
               onClick={() => handleTypeChange(t.value)}
               className={`px-3 py-2 rounded-lg text-sm text-left transition-colors ${
-                question.type === t.value
+                localType === t.value
                   ? 'bg-white text-black'
                   : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
               }`}
@@ -97,7 +111,8 @@ export function QuestionEditor({ question, formId }: Props) {
             <div className="flex gap-2">
               <button
                 onClick={() => {
-                  updateQuestionType(question.id, formId, confirmTypeSwitch, true)
+                  setLocalType(confirmTypeSwitch)
+                  onUpdateQuestionType(question.id, confirmTypeSwitch, true)
                   setConfirmTypeSwitch(null)
                 }}
                 className="px-3 py-1.5 bg-white text-black text-sm rounded-lg"
@@ -115,45 +130,45 @@ export function QuestionEditor({ question, formId }: Props) {
         )}
       </div>
 
-      {/* Choices list — hidden for content-only types */}
-      {(question.type === 'CHOICE' || question.type === 'DROPDOWN') && (
+      {/* Choices list */}
+      {(localType === 'CHOICE' || localType === 'DROPDOWN') && (
         <div>
           <label className="text-white/40 text-xs uppercase tracking-wider mb-2 block">Options</label>
           <div className="flex flex-col gap-2">
             {question.choices
+              .slice()
               .sort((a, b) => a.order - b.order)
               .map((choice) => (
                 <div key={choice.id} className="flex items-center gap-2">
                   <input
                     defaultValue={choice.label}
-                    onBlur={(e) => updateChoice(choice.id, formId, e.target.value)}
+                    onBlur={(e) => onUpdateChoice(choice.id, question.id, e.target.value)}
                     className="flex-1 bg-transparent border-b border-white/20 text-white outline-none py-1 focus:border-white/60 transition-colors text-sm"
                   />
-                  <form action={deleteChoice.bind(null, choice.id, formId)}>
-                    <button type="submit" className="text-white/30 hover:text-red-400 transition-colors text-sm">
-                      ✕
-                    </button>
-                  </form>
+                  <button
+                    onClick={() => onDeleteChoice(choice.id, question.id)}
+                    className="text-white/30 hover:text-red-400 transition-colors text-sm"
+                  >
+                    ✕
+                  </button>
                 </div>
               ))}
-            <form action={createChoice.bind(null, question.id, formId)}>
-              <button
-                type="submit"
-                className="text-white/40 hover:text-white text-sm transition-colors mt-1"
-              >
-                + Add option
-              </button>
-            </form>
+            <button
+              onClick={() => onCreateChoice(question.id)}
+              className="text-white/40 hover:text-white text-sm transition-colors mt-1 text-left"
+            >
+              + Add option
+            </button>
           </div>
         </div>
       )}
 
-      {/* Required toggle — hidden for content-only types */}
-      {!CONTENT_ONLY_TYPES.has(question.type) && (
+      {/* Required toggle */}
+      {!CONTENT_ONLY_TYPES.has(localType) && (
         <div className="flex items-center justify-between">
           <p className="text-white/70 text-sm">Required</p>
           <button
-            onClick={() => updateQuestion(question.id, formId, { required: !question.required })}
+            onClick={() => onUpdateQuestion(question.id, { required: !question.required })}
             className={`w-11 h-6 rounded-full transition-colors relative ${
               question.required ? 'bg-white' : 'bg-white/20'
             }`}

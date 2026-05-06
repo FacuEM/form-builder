@@ -12,6 +12,8 @@ async function getUser() {
   return user
 }
 
+// --- Form-level actions (keep revalidatePath — they redirect or affect dashboard) ---
+
 export async function deleteForm(formId: string) {
   const user = await getUser()
   await prisma.form.delete({ where: { id: formId, creatorId: user.id } })
@@ -30,48 +32,38 @@ export async function createForm() {
 
 export async function updateForm(formId: string, data: { title?: string; published?: boolean; thankYouMessage?: string }) {
   const user = await getUser()
-  await prisma.form.update({
-    where: { id: formId, creatorId: user.id },
-    data,
-  })
-  revalidatePath(`/dashboard/forms/${formId}/edit`)
+  await prisma.form.update({ where: { id: formId, creatorId: user.id }, data })
 }
+
+// --- Question actions (no revalidatePath — BuilderShell manages local state) ---
 
 export async function createQuestion(formId: string) {
   const user = await getUser()
   await prisma.form.findFirstOrThrow({ where: { id: formId, creatorId: user.id } })
-  const last = await prisma.question.findFirst({
-    where: { formId },
-    orderBy: { order: 'desc' },
-  })
-  await prisma.question.create({
+  const last = await prisma.question.findFirst({ where: { formId }, orderBy: { order: 'desc' } })
+  return prisma.question.create({
     data: { formId, text: 'New question', type: 'TEXT', order: (last?.order ?? -1) + 1 },
+    include: { choices: true },
   })
-  revalidatePath(`/dashboard/forms/${formId}/edit`)
 }
 
 export async function updateQuestion(questionId: string, formId: string, data: { text?: string; description?: string; required?: boolean }) {
   const user = await getUser()
   await prisma.form.findFirstOrThrow({ where: { id: formId, creatorId: user.id } })
   await prisma.question.update({ where: { id: questionId }, data })
-  revalidatePath(`/dashboard/forms/${formId}/edit`)
 }
 
 export async function updateQuestionType(questionId: string, formId: string, type: string, deleteChoices: boolean) {
   const user = await getUser()
   await prisma.form.findFirstOrThrow({ where: { id: formId, creatorId: user.id } })
-  if (deleteChoices) {
-    await prisma.choice.deleteMany({ where: { questionId } })
-  }
+  if (deleteChoices) await prisma.choice.deleteMany({ where: { questionId } })
   await prisma.question.update({ where: { id: questionId }, data: { type: type as never } })
-  revalidatePath(`/dashboard/forms/${formId}/edit`)
 }
 
 export async function deleteQuestion(questionId: string, formId: string) {
   const user = await getUser()
   await prisma.form.findFirstOrThrow({ where: { id: formId, creatorId: user.id } })
   await prisma.question.delete({ where: { id: questionId } })
-  revalidatePath(`/dashboard/forms/${formId}/edit`)
 }
 
 export async function moveQuestion(questionId: string, formId: string, dir: 'up' | 'down') {
@@ -87,29 +79,27 @@ export async function moveQuestion(questionId: string, formId: string, dir: 'up'
     prisma.question.update({ where: { id: a.id }, data: { order: b.order } }),
     prisma.question.update({ where: { id: b.id }, data: { order: a.order } }),
   ])
-  revalidatePath(`/dashboard/forms/${formId}/edit`)
 }
+
+// --- Choice actions (no revalidatePath) ---
 
 export async function createChoice(questionId: string, formId: string) {
   const user = await getUser()
   await prisma.form.findFirstOrThrow({ where: { id: formId, creatorId: user.id } })
   const last = await prisma.choice.findFirst({ where: { questionId }, orderBy: { order: 'desc' } })
-  await prisma.choice.create({
+  return prisma.choice.create({
     data: { questionId, label: 'Option', order: (last?.order ?? -1) + 1 },
   })
-  revalidatePath(`/dashboard/forms/${formId}/edit`)
 }
 
 export async function updateChoice(choiceId: string, formId: string, label: string) {
   const user = await getUser()
   await prisma.form.findFirstOrThrow({ where: { id: formId, creatorId: user.id } })
   await prisma.choice.update({ where: { id: choiceId }, data: { label } })
-  revalidatePath(`/dashboard/forms/${formId}/edit`)
 }
 
 export async function deleteChoice(choiceId: string, formId: string) {
   const user = await getUser()
   await prisma.form.findFirstOrThrow({ where: { id: formId, creatorId: user.id } })
   await prisma.choice.delete({ where: { id: choiceId } })
-  revalidatePath(`/dashboard/forms/${formId}/edit`)
 }
