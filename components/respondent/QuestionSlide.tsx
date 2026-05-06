@@ -51,7 +51,10 @@ export function QuestionSlide({
       <p className="text-white/40 text-sm mb-6 font-mono">
         {index + 1} / {total}
       </p>
-      <h2 className="text-white text-2xl font-light mb-8 leading-snug">{question.text}</h2>
+      <h2 className="text-white text-2xl font-light mb-3 leading-snug">{question.text}</h2>
+      {question.description && (
+        <p className="text-white/40 text-sm mb-8 leading-relaxed">{question.description}</p>
+      )}
 
       {question.type === 'STATEMENT' && (
         <NavigationHint onContinue={onSubmit} disabled={submitting} />

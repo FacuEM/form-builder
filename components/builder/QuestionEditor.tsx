@@ -68,6 +68,19 @@ export function QuestionEditor({
         />
       </div>
 
+      {/* Description */}
+      <div>
+        <label className="text-white/40 text-xs uppercase tracking-wider mb-2 block">Description <span className="normal-case text-white/20">(optional)</span></label>
+        <textarea
+          key={`${question.id}-desc`}
+          defaultValue={question.description ?? ''}
+          onBlur={(e) => onUpdateQuestion(question.id, { description: e.target.value })}
+          rows={2}
+          placeholder="Add a description or hint..."
+          className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1.5 focus:border-white/60 transition-colors resize-none text-sm placeholder:text-white/20"
+        />
+      </div>
+
       {/* Type picker */}
       <div>
         <label className="text-white/40 text-xs uppercase tracking-wider mb-2 block">Type</label>
