@@ -59,7 +59,7 @@ All `/dashboard/*` routes are protected by Next.js middleware (`middleware.ts`).
 
 **Supabase + Prisma connection:** Use Supabase's Session Mode connection string (port 5432) for Prisma. Set `DATABASE_URL` to the session-mode URL and `DIRECT_URL` to the direct connection string. Add `directUrl` to `datasource db` in `schema.prisma` — required to avoid PgBouncer timeout errors in serverless.
 
-**Security:** RLS disabled on all tables. Prisma + `SUPABASE_SERVICE_ROLE_KEY` is the sole access control layer. `SUPABASE_SERVICE_ROLE_KEY` is server-only — used only in `lib/supabase/server.ts`, never exported to client components, never prefixed `NEXT_PUBLIC_`. Every creator-scoped Prisma query must include a `creatorId` filter — this is the only ownership check, enforced in code.
+**Security:** RLS is currently disabled on all tables; access control is enforced in application code. Prisma connects via `DATABASE_URL` (Supabase pooler, `postgres` role) — every creator-scoped query must include a `creatorId` filter. The public response endpoint (`POST /api/forms/[id]/responses`) is the only unauthenticated mutator and validates `formId`, `questionId` membership, and payload bounds before writing. **Roadmap:** enable Postgres RLS (see `prisma/rls.sql`) and switch the Prisma connection to a non-superuser role with per-request `SET LOCAL request.jwt.claim.sub` so the database enforces ownership instead of relying on application code alone.
 
 ```
 app/
