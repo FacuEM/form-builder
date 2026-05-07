@@ -52,7 +52,7 @@ export async function createQuestion(formId: string) {
   await prisma.form.findFirstOrThrow({ where: { id: formId, creatorId: user.id } })
   const last = await prisma.question.findFirst({ where: { formId }, orderBy: { order: 'desc' } })
   return prisma.question.create({
-    data: { formId, text: 'New question', type: 'TEXT', order: (last?.order ?? -1) + 1 },
+    data: { formId, text: 'New question', type: 'TEXT', order: (last?.order ?? -1) + 1, required: false },
     include: { choices: true },
   })
 }

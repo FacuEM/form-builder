@@ -23,6 +23,14 @@ export function QuestionList({ questions, selectedId, onSelect, onMove, onDelete
         >
           <span className="text-xs font-mono w-4 shrink-0 opacity-40">{i + 1}</span>
           <span className="flex-1 text-sm truncate">{q.text || 'Untitled'}</span>
+          {q.required && (
+            <span
+              className="shrink-0 text-[10px] font-medium uppercase tracking-wider text-red-400/70"
+              title="Required"
+            >
+              *
+            </span>
+          )}
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
               onClick={(e) => { e.stopPropagation(); onMove(q.id, 'up') }}
