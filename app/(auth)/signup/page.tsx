@@ -8,7 +8,6 @@ export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [done, setDone] = useState(false)
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
@@ -17,11 +16,7 @@ export default function SignupPage() {
     setLoading(true)
 
     const supabase = createClient()
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-    })
+    const { data, error } = await supabase.auth.signUp({ email, password })
 
     if (error) {
       setError(error.message)
@@ -29,27 +24,12 @@ export default function SignupPage() {
       return
     }
 
-    setDone(true)
-  }
+    if (data.session) {
+      window.location.href = '/dashboard'
+      return
+    }
 
-  if (done) {
-    return (
-      <div className="min-h-screen bg-[#080808] flex items-center justify-center px-6">
-        <div className="w-full max-w-sm text-center flex flex-col gap-4">
-          <p className="text-white text-xl font-light">Check your email to confirm your account.</p>
-          <p className="text-white/40 text-sm">
-            Click the link in the email, then{' '}
-            <a href="/login" className="text-white/70 hover:text-white underline">
-              sign in
-            </a>
-            .
-          </p>
-          <p className="text-white/25 text-xs">
-            No email? Check spam, or disable email confirmation in Supabase Auth settings for local dev.
-          </p>
-        </div>
-      </div>
-    )
+    window.location.href = '/login?confirm=1'
   }
 
   return (
@@ -74,7 +54,7 @@ export default function SignupPage() {
             minLength={6}
             className="bg-transparent border-b border-white/20 text-white placeholder:text-white/30 outline-none py-2 focus:border-white/60 transition-colors"
           />
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          <p className="text-red-400 text-sm min-h-[1.25rem]">{error}</p>
           <button
             type="submit"
             disabled={loading}

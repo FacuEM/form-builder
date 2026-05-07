@@ -48,7 +48,7 @@ export default function LoginPage() {
             required
             className="bg-transparent border-b border-white/20 text-white placeholder:text-white/30 outline-none py-2 focus:border-white/60 transition-colors"
           />
-          {error && <p className="text-red-400 text-sm">{error}</p>}
+          <p className="text-red-400 text-sm min-h-[1.25rem]">{error}</p>
           <button
             type="submit"
             disabled={loading}
