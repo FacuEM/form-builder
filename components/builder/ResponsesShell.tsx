@@ -100,8 +100,9 @@ export function ResponsesShell({ form, questions, responses }: Props) {
                 </div>
               )}
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+            <div className="relative">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
                 <thead>
                   <tr className="border-b border-white/10">
                     <th className="text-left text-white/40 font-normal py-3 pr-6 whitespace-nowrap">
@@ -161,6 +162,11 @@ export function ResponsesShell({ form, questions, responses }: Props) {
                   })}
                 </tbody>
               </table>
+              </div>
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-[#080808] to-transparent md:hidden"
+              />
             </div>
           </>
         )}
