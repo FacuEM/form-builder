@@ -65,6 +65,20 @@ export function SettingsPanel({ form }: Props) {
                 className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1 focus:border-white/60 transition-colors resize-none text-sm placeholder:text-white/20"
               />
             </div>
+            <div>
+              <label className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Alert message</label>
+              <textarea
+                defaultValue={form.welcomeAlert ?? ''}
+                onBlur={(e) => {
+                  const val = e.target.value.trim()
+                  updateForm(form.id, { welcomeAlert: val ? val : null })
+                }}
+                rows={2}
+                placeholder="e.g. This form takes ~3 minutes. Answers are anonymous."
+                className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1 focus:border-white/60 transition-colors resize-none text-sm placeholder:text-white/20"
+              />
+              <p className="text-white/30 text-[11px] mt-1">Shown as a highlighted callout on the welcome page. Leave empty to hide.</p>
+            </div>
           </div>
         )}
       </section>

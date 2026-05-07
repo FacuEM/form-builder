@@ -1,9 +1,10 @@
 'use client'
 
 import { AnimatePresence, motion } from 'framer-motion'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { Form } from '@/types'
 import { useRespondentState } from '@/hooks/useRespondentState'
+import { clearProgress, loadProgress, saveProgress, type Stage } from '@/lib/formProgress'
 import { ProgressBar } from './ProgressBar'
 import { QuestionSlide } from './QuestionSlide'
 import { ThankYouScreen } from './ThankYouScreen'
@@ -12,19 +13,65 @@ interface Props {
   form: Form
 }
 
-type Stage = 'welcome' | 'questions' | 'done'
+interface RestoredState {
+  index: number
+  answers: Record<string, string>
+  responseId: string | null
+  stage: Stage
+}
+
+function readInitial(form: Form): RestoredState {
+  const defaultStage: Stage = form.welcomeEnabled ? 'welcome' : 'questions'
+  if (typeof window === 'undefined') {
+    return { index: 0, answers: {}, responseId: null, stage: defaultStage }
+  }
+  const saved = loadProgress(form.id)
+  if (!saved || saved.stage === 'done') {
+    return { index: 0, answers: {}, responseId: null, stage: defaultStage }
+  }
+  // Drop answers for question IDs that no longer exist (form may have been edited)
+  const validIds = new Set(form.questions.map((q) => q.id))
+  const filtered: Record<string, string> = {}
+  for (const [id, val] of Object.entries(saved.answers)) {
+    if (validIds.has(id)) filtered[id] = val
+  }
+  const maxIndex = Math.max(0, form.questions.length - 1)
+  return {
+    index: Math.min(saved.index, maxIndex),
+    answers: filtered,
+    responseId: saved.responseId,
+    stage: saved.stage,
+  }
+}
 
 export function FormPlayer({ form }: Props) {
   const questions = form.questions
-  const initialStage: Stage = form.welcomeEnabled ? 'welcome' : 'questions'
-  const [stage, setStage] = useState<Stage>(initialStage)
+  const [restored] = useState<RestoredState>(() => readInitial(form))
+
+  const [stage, setStage] = useState<Stage>(restored.stage)
   const { currentIndex, direction, answers, navigate, setAnswer, submitting } =
-    useRespondentState(questions.length)
-  const [responseId, setResponseId] = useState<string | null>(null)
+    useRespondentState(questions.length, { index: restored.index, answers: restored.answers })
+  const [responseId, setResponseId] = useState<string | null>(restored.responseId)
   const [error, setError] = useState<string | null>(null)
 
   const currentQuestion = questions[currentIndex]
   const currentValue = currentQuestion ? (answers[currentQuestion.id] ?? '') : ''
+
+  // Persist progress on every meaningful change
+  useEffect(() => {
+    if (stage === 'done') return
+    saveProgress(form.id, {
+      index: currentIndex,
+      answers,
+      responseId,
+      stage,
+    })
+  }, [form.id, currentIndex, answers, responseId, stage])
+
+  // Clear once we're done
+  useEffect(() => {
+    if (stage === 'done') clearProgress(form.id)
+  }, [stage, form.id])
 
   async function handleSubmit(overrideValue?: string) {
     if (!currentQuestion) return
@@ -95,6 +142,18 @@ export function FormPlayer({ form }: Props) {
           <h1 className="text-white text-4xl font-light mb-4 leading-tight">{form.welcomeTitle}</h1>
           {form.welcomeDescription && (
             <p className="text-white/50 text-lg font-light mb-10 leading-relaxed">{form.welcomeDescription}</p>
+          )}
+          {form.welcomeAlert && (
+            <motion.div
+              role="alert"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15, duration: 0.3 }}
+              className="mb-8 flex items-start gap-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3"
+            >
+              <span aria-hidden className="text-amber-300 text-base leading-none mt-0.5">⚠</span>
+              <p className="text-amber-100/90 text-sm leading-relaxed">{form.welcomeAlert}</p>
+            </motion.div>
           )}
           <button
             onClick={() => setStage('questions')}

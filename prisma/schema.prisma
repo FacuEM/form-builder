@@ -15,6 +15,7 @@ model Form {
   welcomeEnabled       Boolean    @default(true)
   welcomeTitle         String     @default("Welcome")
   welcomeDescription   String?
+  welcomeAlert         String?
   thankYouEnabled      Boolean    @default(true)
   thankYouTitle        String     @default("Thank you!")
   thankYouMessage      String     @default("Your response has been recorded.")

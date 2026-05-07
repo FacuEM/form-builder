@@ -11,10 +11,23 @@ export interface RespondentState {
   submitting: boolean
 }
 
-export function useRespondentState(totalQuestions: number): RespondentState {
-  const [currentIndex, setCurrentIndex] = useState(0)
+export interface InitialRespondentState {
+  index?: number
+  answers?: Record<string, string>
+}
+
+export function useRespondentState(
+  totalQuestions: number,
+  initial?: InitialRespondentState,
+): RespondentState {
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    const i = initial?.index ?? 0
+    if (i < 0) return 0
+    if (totalQuestions > 0 && i > totalQuestions - 1) return totalQuestions - 1
+    return i
+  })
   const [direction, setDirection] = useState<Direction>('forward')
-  const [answers, setAnswers] = useState<Record<string, string>>({})
+  const [answers, setAnswers] = useState<Record<string, string>>(() => initial?.answers ?? {})
   const [submitting, setSubmitting] = useState(false)
 
   // Freeze direction at navigate() call time so exit animation reads correct value

@@ -26,6 +26,7 @@ export interface Form {
   welcomeEnabled: boolean
   welcomeTitle: string
   welcomeDescription?: string | null
+  welcomeAlert?: string | null
   thankYouEnabled: boolean
   thankYouTitle: string
   thankYouMessage: string

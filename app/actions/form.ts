@@ -36,6 +36,7 @@ export async function updateForm(formId: string, data: {
   welcomeEnabled?: boolean
   welcomeTitle?: string
   welcomeDescription?: string
+  welcomeAlert?: string | null
   thankYouEnabled?: boolean
   thankYouTitle?: string
   thankYouMessage?: string
