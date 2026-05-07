@@ -139,21 +139,21 @@ export function FormPlayer({ form }: Props) {
         className="min-h-screen bg-[#080808] flex items-center justify-center px-6"
       >
         <div className="max-w-xl w-full">
-          <h1 className="text-white text-4xl font-light mb-4 leading-tight">{form.welcomeTitle}</h1>
-          {form.welcomeDescription && (
-            <p className="text-white/50 text-lg font-light mb-10 leading-relaxed">{form.welcomeDescription}</p>
-          )}
           {form.welcomeAlert && (
             <motion.div
               role="alert"
-              initial={{ opacity: 0, y: 8 }}
+              initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15, duration: 0.3 }}
-              className="mb-8 flex items-start gap-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3"
+              transition={{ duration: 0.3 }}
+              className="mb-6 flex items-start gap-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3"
             >
               <span aria-hidden className="text-amber-300 text-base leading-none mt-0.5">⚠</span>
               <p className="text-amber-100/90 text-sm leading-relaxed">{form.welcomeAlert}</p>
             </motion.div>
+          )}
+          <h1 className="text-white text-4xl font-light mb-4 leading-tight">{form.welcomeTitle}</h1>
+          {form.welcomeDescription && (
+            <p className="text-white/50 text-lg font-light mb-10 leading-relaxed">{form.welcomeDescription}</p>
           )}
           <button
             onClick={() => setStage('questions')}
