@@ -19,7 +19,7 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen bg-[#080808] px-6 py-12">
       <div className="max-w-3xl mx-auto">
-        <div className="flex items-center justify-between mb-10">
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-10">
           <h1 className="text-white text-2xl font-light">Your forms</h1>
           <div className="flex items-center gap-3">
             <form action={createForm}>
