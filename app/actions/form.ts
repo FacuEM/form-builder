@@ -57,7 +57,7 @@ export async function createQuestion(formId: string) {
   })
 }
 
-export async function updateQuestion(questionId: string, formId: string, data: { text?: string; description?: string; required?: boolean }) {
+export async function updateQuestion(questionId: string, formId: string, data: { text?: string; description?: string; required?: boolean; scored?: boolean }) {
   const user = await getUser()
   await prisma.form.findFirstOrThrow({ where: { id: formId, creatorId: user.id } })
   await prisma.question.update({ where: { id: questionId }, data })
@@ -102,10 +102,10 @@ export async function createChoice(questionId: string, formId: string) {
   })
 }
 
-export async function updateChoice(choiceId: string, formId: string, label: string) {
+export async function updateChoice(choiceId: string, formId: string, data: { label?: string; weight?: number }) {
   const user = await getUser()
   await prisma.form.findFirstOrThrow({ where: { id: formId, creatorId: user.id } })
-  await prisma.choice.update({ where: { id: choiceId }, data: { label } })
+  await prisma.choice.update({ where: { id: choiceId }, data })
 }
 
 export async function deleteChoice(choiceId: string, formId: string) {

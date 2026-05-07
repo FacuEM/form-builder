@@ -5,6 +5,7 @@ export interface Choice {
   questionId: string
   label: string
   order: number
+  weight: number
 }
 
 export interface Question {
@@ -15,6 +16,7 @@ export interface Question {
   description?: string | null
   type: QuestionType
   required: boolean
+  scored: boolean
   choices: Choice[]
 }
 

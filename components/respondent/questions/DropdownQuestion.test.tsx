@@ -9,9 +9,10 @@ const question = {
   text: 'Choose a country',
   type: 'DROPDOWN' as const,
   required: true,
+  scored: false,
   choices: [
-    { id: 'c1', questionId: 'q1', label: 'USA', order: 0 },
-    { id: 'c2', questionId: 'q1', label: 'Canada', order: 1 },
+    { id: 'c1', questionId: 'q1', label: 'USA', order: 0, weight: 0 },
+    { id: 'c2', questionId: 'q1', label: 'Canada', order: 1, weight: 0 },
   ],
   answers: [],
 }

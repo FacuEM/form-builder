@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react'
 import type { Question } from '@/types'
+import { hasAnyScoredQuestion, totalScore, weightForAnswer } from '@/lib/scoring'
 
 interface Answer {
   id: string
@@ -34,6 +35,8 @@ export function ResponseDetail({ response, questions, onClose }: Props) {
   if (!response) return null
 
   const answerMap = Object.fromEntries(response.answers.map((a) => [a.questionId, a.value]))
+  const showScores = hasAnyScoredQuestion(questions)
+  const score = showScores ? totalScore(questions, response.answers) : null
 
   return (
     <>
@@ -64,17 +67,35 @@ export function ResponseDetail({ response, questions, onClose }: Props) {
           </button>
         </div>
 
+        {score != null && (
+          <div className="px-6 py-4 border-b border-white/10 flex items-baseline justify-between">
+            <span className="text-white/40 text-xs uppercase tracking-wider">Total score</span>
+            <span className="text-white text-2xl font-mono">{score}</span>
+          </div>
+        )}
+
         <div className="px-6 py-6 flex flex-col gap-6">
-          {questions.map((q, i) => (
-            <div key={q.id}>
-              <p className="text-white/40 text-xs mb-1">
-                {i + 1}. {q.text}
-              </p>
-              <p className="text-white text-sm">
-                {answerMap[q.id] ?? <span className="text-white/20 italic">No answer</span>}
-              </p>
-            </div>
-          ))}
+          {questions.map((q, i) => {
+            const value = answerMap[q.id]
+            const weight = weightForAnswer(q, value)
+            return (
+              <div key={q.id}>
+                <p className="text-white/40 text-xs mb-1">
+                  {i + 1}. {q.text}
+                </p>
+                <div className="flex items-center gap-2">
+                  <p className="text-white text-sm">
+                    {value ?? <span className="text-white/20 italic">No answer</span>}
+                  </p>
+                  {weight != null && (
+                    <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-white/10 text-white/70">
+                      +{weight}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )
+          })}
         </div>
       </div>
     </>

@@ -17,10 +17,10 @@ const CONTENT_ONLY_TYPES = new Set<QuestionType>(['STATEMENT'])
 
 interface Props {
   question: Question
-  onUpdateQuestion: (id: string, data: { text?: string; description?: string; required?: boolean }) => void
+  onUpdateQuestion: (id: string, data: { text?: string; description?: string; required?: boolean; scored?: boolean }) => void
   onUpdateQuestionType: (id: string, type: Question['type'], deleteChoices: boolean) => void
   onCreateChoice: (questionId: string) => void
-  onUpdateChoice: (choiceId: string, questionId: string, label: string) => void
+  onUpdateChoice: (choiceId: string, questionId: string, data: { label?: string; weight?: number }) => void
   onDeleteChoice: (choiceId: string, questionId: string) => void
 }
 
@@ -139,9 +139,19 @@ export function QuestionEditor({
                 <div key={choice.id} className="flex items-center gap-2">
                   <input
                     defaultValue={choice.label}
-                    onBlur={(e) => onUpdateChoice(choice.id, question.id, e.target.value)}
+                    onBlur={(e) => onUpdateChoice(choice.id, question.id, { label: e.target.value })}
                     className="flex-1 bg-transparent border-b border-white/20 text-white outline-none py-1 focus:border-white/60 transition-colors text-sm"
                   />
+                  {question.scored && (
+                    <input
+                      key={`${choice.id}-w`}
+                      type="number"
+                      defaultValue={choice.weight}
+                      onBlur={(e) => onUpdateChoice(choice.id, question.id, { weight: Number(e.target.value) || 0 })}
+                      title="Weight"
+                      className="w-14 bg-transparent border border-white/20 rounded text-white outline-none px-2 py-1 focus:border-white/60 transition-colors text-sm text-center"
+                    />
+                  )}
                   <button
                     onClick={() => onDeleteChoice(choice.id, question.id)}
                     className="text-white/30 hover:text-red-400 transition-colors text-sm"
@@ -155,6 +165,26 @@ export function QuestionEditor({
               className="text-white/40 hover:text-white text-sm transition-colors mt-1 text-left"
             >
               + Add option
+            </button>
+          </div>
+
+          {/* Score toggle */}
+          <div className="flex items-center justify-between mt-5">
+            <div>
+              <p className="text-white/70 text-sm">Score this question</p>
+              <p className="text-white/30 text-xs mt-0.5">Assign a weight to each option to rank responses</p>
+            </div>
+            <button
+              onClick={() => onUpdateQuestion(question.id, { scored: !question.scored })}
+              className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${
+                question.scored ? 'bg-white' : 'bg-white/20'
+              }`}
+            >
+              <span
+                className={`absolute top-1 w-4 h-4 rounded-full transition-all ${
+                  question.scored ? 'left-6 bg-black' : 'left-1 bg-white/60'
+                }`}
+              />
             </button>
           </div>
         </div>

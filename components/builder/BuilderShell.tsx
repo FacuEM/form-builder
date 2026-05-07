@@ -49,7 +49,7 @@ export function BuilderShell({ form, hasResponses }: Props) {
     refresh()
   }
 
-  async function handleUpdateQuestion(questionId: string, data: { text?: string; description?: string; required?: boolean }) {
+  async function handleUpdateQuestion(questionId: string, data: { text?: string; description?: string; required?: boolean; scored?: boolean }) {
     setQuestions((prev) =>
       prev.map((q) => (q.id === questionId ? { ...q, ...data } : q))
     )
@@ -101,7 +101,7 @@ export function BuilderShell({ form, hasResponses }: Props) {
     setQuestions((prev) =>
       prev.map((q) =>
         q.id === questionId
-          ? { ...q, choices: [...q.choices, { id: tempId, questionId, label: 'Option', order: q.choices.length }] }
+          ? { ...q, choices: [...q.choices, { id: tempId, questionId, label: 'Option', order: q.choices.length, weight: 0 }] }
           : q
       )
     )
@@ -116,15 +116,15 @@ export function BuilderShell({ form, hasResponses }: Props) {
     refresh()
   }
 
-  async function handleUpdateChoice(choiceId: string, questionId: string, label: string) {
+  async function handleUpdateChoice(choiceId: string, questionId: string, data: { label?: string; weight?: number }) {
     setQuestions((prev) =>
       prev.map((q) =>
         q.id === questionId
-          ? { ...q, choices: q.choices.map((c) => (c.id === choiceId ? { ...c, label } : c)) }
+          ? { ...q, choices: q.choices.map((c) => (c.id === choiceId ? { ...c, ...data } : c)) }
           : q
       )
     )
-    await updateChoice(choiceId, form.id, label)
+    await updateChoice(choiceId, form.id, data)
     refresh()
   }
 

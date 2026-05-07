@@ -11,10 +11,11 @@ const question = {
   text: 'Pick one',
   type: 'CHOICE' as const,
   required: true,
+  scored: false,
   choices: [
-    { id: 'c1', questionId: 'q1', label: 'Apple', order: 0 },
-    { id: 'c2', questionId: 'q1', label: 'Banana', order: 1 },
-    { id: 'c3', questionId: 'q1', label: 'Cherry', order: 2 },
+    { id: 'c1', questionId: 'q1', label: 'Apple', order: 0, weight: 0 },
+    { id: 'c2', questionId: 'q1', label: 'Banana', order: 1, weight: 0 },
+    { id: 'c3', questionId: 'q1', label: 'Cherry', order: 2, weight: 0 },
   ],
   answers: [],
 }

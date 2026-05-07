@@ -9,6 +9,7 @@ const baseQuestion = {
   text: 'What is your name?',
   type: 'TEXT' as const,
   required: true,
+  scored: false,
   choices: [],
   answers: [],
 }
