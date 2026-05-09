@@ -13,14 +13,15 @@ export default async function EditPage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
 
-  const form = await prisma.form.findFirst({
-    where: { id, creatorId: user.id },
-    include: { questions: { include: { choices: true }, orderBy: { order: 'asc' } } },
-  })
+  const [form, responseCount] = await Promise.all([
+    prisma.form.findFirst({
+      where: { id, creatorId: user.id },
+      include: { questions: { include: { choices: true }, orderBy: { order: 'asc' } } },
+    }),
+    prisma.response.count({ where: { formId: id } }),
+  ])
 
   if (!form) notFound()
 
-  const hasResponses = await prisma.response.count({ where: { formId: id } })
-
-  return <BuilderShell form={form as never} hasResponses={hasResponses > 0} />
+  return <BuilderShell form={form as never} hasResponses={responseCount > 0} />
 }

@@ -56,10 +56,11 @@ export function QuestionEditor({
     <div className="flex flex-col gap-6">
       {/* Text field */}
       <div>
-        <label className="text-white/40 text-xs uppercase tracking-wider mb-2 block">
+        <label htmlFor="question-text" className="text-white/40 text-xs uppercase tracking-wider mb-2 block">
           {localType === 'STATEMENT' ? 'Content' : 'Question'}
         </label>
         <textarea
+          id="question-text"
           key={question.id}
           defaultValue={question.text}
           onBlur={(e) => onUpdateQuestion(question.id, { text: e.target.value })}
@@ -70,8 +71,9 @@ export function QuestionEditor({
 
       {/* Description */}
       <div>
-        <label className="text-white/40 text-xs uppercase tracking-wider mb-2 block">Description <span className="normal-case text-white/20">(optional)</span></label>
+        <label htmlFor="question-desc" className="text-white/40 text-xs uppercase tracking-wider mb-2 block">Description <span className="normal-case text-white/20">(optional)</span></label>
         <textarea
+          id="question-desc"
           key={`${question.id}-desc`}
           defaultValue={question.description ?? ''}
           onBlur={(e) => onUpdateQuestion(question.id, { description: e.target.value })}
@@ -83,7 +85,7 @@ export function QuestionEditor({
 
       {/* Type picker */}
       <div>
-        <label className="text-white/40 text-xs uppercase tracking-wider mb-2 block">Type</label>
+        <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Type</p>
         <div className="grid grid-cols-2 gap-1.5">
           {TYPES.map((t) => (
             <button
@@ -130,7 +132,7 @@ export function QuestionEditor({
       {/* Choices list */}
       {(localType === 'CHOICE' || localType === 'DROPDOWN') && (
         <div>
-          <label className="text-white/40 text-xs uppercase tracking-wider mb-2 block">Options</label>
+          <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Options</p>
           <div className="flex flex-col gap-2">
             {question.choices
               .slice()

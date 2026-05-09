@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import type { Direction } from '@/hooks/useRespondentState'
 import type { Question } from '@/types'
 import { TextQuestion } from './questions/TextQuestion'
@@ -38,7 +38,7 @@ export function QuestionSlide({
   submitting,
 }: Props) {
   return (
-    <motion.div
+    <m.div
       key={question.id}
       custom={direction}
       variants={variants}
@@ -75,6 +75,6 @@ export function QuestionSlide({
           hasAnswer={value.trim().length > 0}
         />
       )}
-    </motion.div>
+    </m.div>
   )
 }

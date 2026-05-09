@@ -27,7 +27,7 @@ export function FormsList({ forms }: { forms: Form[] }) {
 }
 
 function FormRow({ form }: { form: Form }) {
-  const router = useRouter()
+  const { refresh } = useRouter()
   const [renaming, setRenaming] = useState(false)
   const [title, setTitle] = useState(form.title)
   const [saving, setSaving] = useState(false)
@@ -43,7 +43,7 @@ function FormRow({ form }: { form: Form }) {
     setSaving(true)
     await updateForm(form.id, { title: trimmed })
     setSaving(false)
-    router.refresh()
+    refresh()
   }
 
   async function copyLink(e: React.MouseEvent) {
@@ -56,7 +56,7 @@ function FormRow({ form }: { form: Form }) {
   }
 
   return (
-    <div className="flex items-center justify-between px-4 py-4 rounded-xl border border-white/10 hover:border-white/20 transition-all group">
+    <div className="flex items-center justify-between p-4 rounded-xl border border-white/10 hover:border-white/20 transition-all group">
       <div className="flex-1 min-w-0">
         {renaming ? (
           <input

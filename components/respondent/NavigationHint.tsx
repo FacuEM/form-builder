@@ -1,8 +1,12 @@
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { AnimatePresence, m } from 'framer-motion'
+import { useEffect, useSyncExternalStore, useState } from 'react'
 import { detectTouchDevice } from '@/lib/touchDetect'
+
+const subscribe = () => () => {}
+const useTouchDevice = () =>
+  useSyncExternalStore(subscribe, detectTouchDevice, () => false)
 
 interface Props {
   onContinue: (value?: string) => void
@@ -16,11 +20,7 @@ interface Props {
 
 export function NavigationHint({ onContinue, disabled, hasAnswer = true }: Props) {
   const [hintVisible, setHintVisible] = useState(false)
-  const [isTouchDevice, setIsTouchDevice] = useState(false)
-
-  useEffect(() => {
-    setIsTouchDevice(detectTouchDevice())
-  }, [])
+  const isTouchDevice = useTouchDevice()
 
   useEffect(() => {
     setHintVisible(false)
@@ -31,7 +31,7 @@ export function NavigationHint({ onContinue, disabled, hasAnswer = true }: Props
   // Touch devices: keep tap target visible but disable until answered.
   if (isTouchDevice) {
     return (
-      <div className="mt-8">
+      <div className="mt-8" suppressHydrationWarning>
         <AnimatePresence>
           {hasAnswer && (
             <ContinueButton key="btn" onClick={() => onContinue()} disabled={disabled} />
@@ -50,12 +50,12 @@ export function NavigationHint({ onContinue, disabled, hasAnswer = true }: Props
   }
 
   return (
-    <div className="mt-8 flex items-center gap-4 min-h-[48px]">
+    <div className="mt-8 flex items-center gap-4 min-h-[48px]" suppressHydrationWarning>
       <AnimatePresence mode="wait">
         {hasAnswer ? (
           <ContinueButton key="btn" onClick={() => onContinue()} disabled={disabled} />
         ) : (
-          <motion.div
+          <m.div
             key="hint"
             initial={{ opacity: 0 }}
             animate={{ opacity: hintVisible ? 1 : 0 }}
@@ -64,18 +64,18 @@ export function NavigationHint({ onContinue, disabled, hasAnswer = true }: Props
             className="text-white/40 text-sm select-none"
           >
             Press <kbd className="font-mono">Enter</kbd> ↵
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
       {hasAnswer && (
-        <motion.span
+        <m.span
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
           className="text-white/40 text-xs select-none"
         >
           or press <kbd className="font-mono">Enter</kbd> ↵
-        </motion.span>
+        </m.span>
       )}
     </div>
   )
@@ -88,7 +88,7 @@ interface ContinueButtonProps {
 
 function ContinueButton({ onClick, disabled }: ContinueButtonProps) {
   return (
-    <motion.button
+    <m.button
       type="button"
       onClick={onClick}
       disabled={disabled}
@@ -115,14 +115,14 @@ function ContinueButton({ onClick, disabled }: ContinueButtonProps) {
       className="group relative inline-flex items-center gap-2 px-6 py-3 bg-white text-black font-medium rounded-lg disabled:opacity-40 disabled:cursor-not-allowed"
     >
       <span>Continue</span>
-      <motion.span
+      <m.span
         aria-hidden
         animate={{ x: [0, 4, 0] }}
         transition={{ duration: 1.2, repeat: Infinity, ease: 'easeInOut' }}
         className="inline-block"
       >
         →
-      </motion.span>
-    </motion.button>
+      </m.span>
+    </m.button>
   )
 }

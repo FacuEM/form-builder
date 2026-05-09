@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
 import type { Question } from '@/types'
 
 interface Props {
@@ -87,19 +87,19 @@ export function DropdownQuestion({ question, value, onChange, onSubmit, disabled
         <span className={`text-xl ${value ? 'text-white' : 'text-white/30'}`}>
           {value || 'Select an option'}
         </span>
-        <motion.span
+        <m.span
           animate={{ rotate: open ? 180 : 0 }}
           transition={{ duration: 0.15 }}
           className="text-white/40 text-sm ml-3 shrink-0"
         >
           ↓
-        </motion.span>
+        </m.span>
       </button>
 
       {/* Dropdown list */}
       <AnimatePresence>
         {open && (
-          <motion.ul
+          <m.ul
             initial={{ opacity: 0, y: -6 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -6 }}
@@ -128,7 +128,7 @@ export function DropdownQuestion({ question, value, onChange, onSubmit, disabled
                 </button>
               </li>
             ))}
-          </motion.ul>
+          </m.ul>
         )}
       </AnimatePresence>
     </div>

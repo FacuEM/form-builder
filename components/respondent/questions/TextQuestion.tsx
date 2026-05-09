@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import type { Question } from '@/types'
 
@@ -40,7 +40,7 @@ export function TextQuestion({ question, value, onChange, onSubmit, disabled }: 
     'w-full bg-transparent border-b border-white/20 text-white text-xl placeholder:text-white/30 outline-none pb-2 focus:border-white/60 transition-colors duration-150'
 
   return (
-    <motion.div
+    <m.div
       animate={shake ? { x: [0, -8, 8, -8, 0] } : { x: 0 }}
       transition={{ duration: 0.3 }}
       onAnimationComplete={() => setShake(false)}
@@ -68,6 +68,6 @@ export function TextQuestion({ question, value, onChange, onSubmit, disabled }: 
           className={sharedClasses}
         />
       )}
-    </motion.div>
+    </m.div>
   )
 }

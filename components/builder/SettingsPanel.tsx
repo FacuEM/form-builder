@@ -48,16 +48,18 @@ export function SettingsPanel({ form }: Props) {
         {welcomeEnabled && (
           <div className="flex flex-col gap-3 pl-3 border-l border-white/10">
             <div>
-              <label className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Title</label>
+              <label htmlFor="welcome-title" className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Title</label>
               <input
+                id="welcome-title"
                 defaultValue={form.welcomeTitle}
                 onBlur={(e) => updateForm(form.id, { welcomeTitle: e.target.value })}
                 className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1 focus:border-white/60 transition-colors text-sm"
               />
             </div>
             <div>
-              <label className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Description</label>
+              <label htmlFor="welcome-desc" className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Description</label>
               <textarea
+                id="welcome-desc"
                 defaultValue={form.welcomeDescription ?? ''}
                 onBlur={(e) => updateForm(form.id, { welcomeDescription: e.target.value })}
                 rows={2}
@@ -66,8 +68,9 @@ export function SettingsPanel({ form }: Props) {
               />
             </div>
             <div>
-              <label className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Alert message</label>
+              <label htmlFor="welcome-alert" className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Alert message</label>
               <textarea
+                id="welcome-alert"
                 defaultValue={form.welcomeAlert ?? ''}
                 onBlur={(e) => {
                   const val = e.target.value.trim()
@@ -105,16 +108,18 @@ export function SettingsPanel({ form }: Props) {
         {thankYouEnabled && (
           <div className="flex flex-col gap-3 pl-3 border-l border-white/10">
             <div>
-              <label className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Title</label>
+              <label htmlFor="thankyou-title" className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Title</label>
               <input
+                id="thankyou-title"
                 defaultValue={form.thankYouTitle}
                 onBlur={(e) => updateForm(form.id, { thankYouTitle: e.target.value })}
                 className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1 focus:border-white/60 transition-colors text-sm"
               />
             </div>
             <div>
-              <label className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Description</label>
+              <label htmlFor="thankyou-desc" className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Description</label>
               <textarea
+                id="thankyou-desc"
                 defaultValue={form.thankYouMessage}
                 onBlur={(e) => updateForm(form.id, { thankYouMessage: e.target.value })}
                 rows={2}

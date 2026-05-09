@@ -42,15 +42,19 @@ export function ResponseDetail({ response, questions, onClose }: Props) {
     <>
       {/* Backdrop */}
       <div
+        role="button"
+        tabIndex={-1}
+        aria-label="Close"
         className="fixed inset-0 bg-black/60 z-40"
         onClick={onClose}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClose() }}
       />
       {/* Panel */}
       <div className="fixed right-0 top-0 bottom-0 w-full max-w-md bg-[#0d0d0d] border-l border-white/10 z-50 overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-5 border-b border-white/10">
           <div>
             <p className="text-white text-sm font-medium">Response</p>
-            <p className="text-white/40 text-xs mt-0.5">
+            <p className="text-white/40 text-xs mt-0.5" suppressHydrationWarning>
               {new Date(response.createdAt).toLocaleString()} ·{' '}
               {response.completed ? (
                 <span className="text-green-400/70">Complete</span>
@@ -74,7 +78,7 @@ export function ResponseDetail({ response, questions, onClose }: Props) {
           </div>
         )}
 
-        <div className="px-6 py-6 flex flex-col gap-6">
+        <div className="p-6 flex flex-col gap-6">
           {questions.map((q, i) => {
             const value = answerMap[q.id]
             const weight = weightForAnswer(q, value)

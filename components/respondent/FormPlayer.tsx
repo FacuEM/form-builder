@@ -1,6 +1,6 @@
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion'
 import { useEffect, useState } from 'react'
 import type { Form } from '@/types'
 import { useRespondentState } from '@/hooks/useRespondentState'
@@ -121,84 +121,84 @@ export function FormPlayer({ form }: Props) {
     }
   }
 
-  if (stage === 'done') {
-    return (
-      <ThankYouScreen
-        title={form.thankYouTitle}
-        description={form.thankYouMessage || undefined}
-      />
-    )
-  }
-
-  if (stage === 'welcome') {
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
-        className="min-h-screen bg-[#080808] flex items-center justify-center px-6"
-      >
-        <div className="max-w-xl w-full">
-          {form.welcomeAlert && (
-            <motion.div
-              role="alert"
-              initial={{ opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="mb-6 flex items-start gap-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3"
-            >
-              <span aria-hidden className="text-amber-300 text-base leading-none mt-0.5">⚠</span>
-              <p className="text-amber-100/90 text-sm leading-relaxed">{form.welcomeAlert}</p>
-            </motion.div>
-          )}
-          <h1 className="text-white text-4xl font-light mb-4 leading-tight">{form.welcomeTitle}</h1>
-          {form.welcomeDescription && (
-            <p className="text-white/50 text-lg font-light mb-10 leading-relaxed">{form.welcomeDescription}</p>
-          )}
-          <button
-            onClick={() => setStage('questions')}
-            className="mt-8 px-8 py-3.5 bg-white text-black font-medium rounded-lg hover:bg-white/90 transition-colors"
-          >
-            Start →
-          </button>
-        </div>
-      </motion.div>
-    )
-  }
-
   return (
-    <div className="relative min-h-screen bg-[#080808] flex flex-col items-center justify-center overflow-hidden">
-      <ProgressBar current={currentIndex} total={questions.length} />
-
-      <AnimatePresence mode="wait" custom={direction}>
-        {currentQuestion && (
-          <QuestionSlide
-            key={currentQuestion.id}
-            question={currentQuestion}
-            index={currentIndex}
-            total={questions.length}
-            direction={direction}
-            value={currentValue}
-            onChange={(val) => setAnswer(currentQuestion.id, val)}
-            onSubmit={handleSubmit}
-            submitting={submitting}
-          />
-        )}
-      </AnimatePresence>
-
-      {error && (
-        <p className="fixed bottom-8 left-1/2 -translate-x-1/2 text-red-400 text-sm">{error}</p>
+    <LazyMotion features={domAnimation}>
+      {stage === 'done' && (
+        <ThankYouScreen
+          title={form.thankYouTitle}
+          description={form.thankYouMessage || undefined}
+        />
       )}
 
-      {currentIndex > 0 && (
-        <button
-          onClick={() => navigate('back')}
-          className="fixed bottom-8 right-8 text-white/30 hover:text-white/60 text-sm transition-colors"
+      {stage === 'welcome' && (
+        <m.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
+          className="min-h-screen bg-[#080808] flex items-center justify-center px-6"
         >
-          ← Back
-        </button>
+          <div className="max-w-xl w-full">
+            {form.welcomeAlert && (
+              <m.div
+                role="alert"
+                initial={{ opacity: 0, y: -8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="mb-6 flex items-start gap-3 rounded-lg border border-amber-400/30 bg-amber-400/10 px-4 py-3"
+              >
+                <span aria-hidden className="text-amber-300 text-base leading-none mt-0.5">⚠</span>
+                <p className="text-amber-100/90 text-sm leading-relaxed">{form.welcomeAlert}</p>
+              </m.div>
+            )}
+            <h1 className="text-white text-4xl font-light mb-4 leading-tight">{form.welcomeTitle}</h1>
+            {form.welcomeDescription && (
+              <p className="text-white/50 text-lg font-light mb-10 leading-relaxed">{form.welcomeDescription}</p>
+            )}
+            <button
+              onClick={() => setStage('questions')}
+              className="mt-8 px-8 py-3.5 bg-white text-black font-medium rounded-lg hover:bg-white/90 transition-colors"
+            >
+              Start →
+            </button>
+          </div>
+        </m.div>
       )}
-    </div>
+
+      {stage === 'questions' && (
+        <div className="relative min-h-screen bg-[#080808] flex flex-col items-center justify-center overflow-hidden">
+          <ProgressBar current={currentIndex} total={questions.length} />
+
+          <AnimatePresence mode="wait" custom={direction}>
+            {currentQuestion && (
+              <QuestionSlide
+                key={currentQuestion.id}
+                question={currentQuestion}
+                index={currentIndex}
+                total={questions.length}
+                direction={direction}
+                value={currentValue}
+                onChange={(val) => setAnswer(currentQuestion.id, val)}
+                onSubmit={handleSubmit}
+                submitting={submitting}
+              />
+            )}
+          </AnimatePresence>
+
+          {error && (
+            <p className="fixed bottom-8 left-1/2 -translate-x-1/2 text-red-400 text-sm">{error}</p>
+          )}
+
+          {currentIndex > 0 && (
+            <button
+              onClick={() => navigate('back')}
+              className="fixed bottom-8 right-8 text-white/30 hover:text-white/60 text-sm transition-colors"
+            >
+              ← Back
+            </button>
+          )}
+        </div>
+      )}
+    </LazyMotion>
   )
 }
 

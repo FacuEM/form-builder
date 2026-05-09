@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 
 interface Props {
   current: number
@@ -12,7 +12,7 @@ export function ProgressBar({ current, total }: Props) {
 
   return (
     <div className="fixed top-0 left-0 right-0 h-[2px] bg-white/10 z-50">
-      <motion.div
+      <m.div
         className="h-full bg-white"
         animate={{ width: `${pct}%` }}
         transition={{ type: 'spring', stiffness: 300, damping: 30 }}

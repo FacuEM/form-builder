@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import confetti from 'canvas-confetti'
 
 interface Props {
@@ -20,7 +20,7 @@ export function ThankYouScreen({ title, description }: Props) {
 
   return (
     <div className="min-h-screen bg-[#080808] flex items-center justify-center px-6">
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.25, 0.1, 0.25, 1] }}
@@ -30,7 +30,7 @@ export function ThankYouScreen({ title, description }: Props) {
         {description && (
           <p className="text-white/50 text-lg font-light leading-relaxed">{description}</p>
         )}
-      </motion.div>
+      </m.div>
     </div>
   )
 }

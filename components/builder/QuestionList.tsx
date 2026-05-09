@@ -16,10 +16,13 @@ export function QuestionList({ questions, selectedId, onSelect, onMove, onDelete
       {questions.map((q, i) => (
         <div
           key={q.id}
+          role="listitem"
+          tabIndex={0}
           className={`group flex items-center gap-2 px-3 py-2.5 rounded-lg cursor-pointer transition-colors ${
             selectedId === q.id ? 'bg-white/10 text-white' : 'text-white/50 hover:text-white/80 hover:bg-white/5'
           }`}
           onClick={() => onSelect(q.id)}
+          onKeyDown={(e) => { if (e.key === 'Enter') onSelect(q.id) }}
         >
           <span className="text-xs font-mono w-4 shrink-0 opacity-40">{i + 1}</span>
           <span className="flex-1 text-sm truncate">{q.text || 'Untitled'}</span>

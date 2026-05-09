@@ -45,9 +45,9 @@ export function ResponsesShell({ form, questions, responses }: Props) {
 
   const sorted = useMemo(() => {
     if (sortMode === 'score' && showScores) {
-      return [...scored].sort((a, b) => b.score - a.score)
+      return scored.toSorted((a, b) => b.score - a.score)
     }
-    return [...scored].sort(
+    return scored.toSorted(
       (a, b) => new Date(b.r.createdAt).getTime() - new Date(a.r.createdAt).getTime(),
     )
   }, [scored, sortMode, showScores])
@@ -135,7 +135,7 @@ export function ResponsesShell({ form, questions, responses }: Props) {
                         onClick={() => setSelected(r)}
                         className="border-b border-white/5 hover:bg-white/3 cursor-pointer transition-colors"
                       >
-                        <td className="py-3 pr-6 text-white/60 whitespace-nowrap">
+                        <td className="py-3 pr-6 text-white/60 whitespace-nowrap" suppressHydrationWarning>
                           {new Date(r.createdAt).toLocaleString()}
                         </td>
                         <td className="py-3 pr-6 whitespace-nowrap">
@@ -153,7 +153,7 @@ export function ResponsesShell({ form, questions, responses }: Props) {
                         {questions.map((q) => (
                           <td key={q.id} className="py-3 pr-6 text-white/80 max-w-[180px]">
                             <span className="truncate block">
-                              {answerMap[q.id] ?? <span className="text-white/20">—</span>}
+                              {answerMap[q.id] ?? <span className="text-white/20">-</span>}
                             </span>
                           </td>
                         ))}

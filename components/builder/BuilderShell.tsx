@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { QuestionList } from './QuestionList'
@@ -26,7 +26,7 @@ interface Props {
 type Tab = 'questions' | 'settings'
 
 export function BuilderShell({ form, hasResponses }: Props) {
-  const router = useRouter()
+  const { refresh } = useRouter()
   const [questions, setQuestions] = useState<Question[]>(form.questions)
   const [selectedId, setSelectedId] = useState<string | null>(form.questions[0]?.id ?? null)
   const [tab, setTab] = useState<Tab>('questions')
@@ -36,8 +36,6 @@ export function BuilderShell({ form, hasResponses }: Props) {
   useEffect(() => {
     setQuestions(form.questions)
   }, [form.questions])
-
-  const refresh = useCallback(() => router.refresh(), [router])
 
   async function handleCreateQuestion() {
     const newQ = await createQuestion(form.id)

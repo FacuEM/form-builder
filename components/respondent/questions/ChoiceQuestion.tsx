@@ -1,9 +1,13 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { m } from 'framer-motion'
+import { useEffect, useSyncExternalStore, useState } from 'react'
 import type { Question } from '@/types'
 import { detectTouchDevice } from '@/lib/touchDetect'
+
+const subscribe = () => () => {}
+const useTouchDevice = () =>
+  useSyncExternalStore(subscribe, detectTouchDevice, () => false)
 
 interface Props {
   question: Question
@@ -17,15 +21,10 @@ const KEY_MAP: Record<string, number> = { a: 0, b: 1, c: 2, d: 3 }
 
 export function ChoiceQuestion({ question, value, onChange, onSubmit, disabled }: Props) {
   const [shake, setShake] = useState(false)
-  const [isTouchDevice, setIsTouchDevice] = useState(false)
-
-  useEffect(() => {
-    setIsTouchDevice(detectTouchDevice())
-  }, [])
+  const isTouchDevice = useTouchDevice()
 
   useEffect(() => {
     if (isTouchDevice) return
-
     function onKeyDown(e: KeyboardEvent) {
       const key = e.key.toLowerCase()
       if (key in KEY_MAP) {
@@ -46,7 +45,8 @@ export function ChoiceQuestion({ question, value, onChange, onSubmit, disabled }
   }, [isTouchDevice, question.choices, question.required, value, onChange, onSubmit])
 
   return (
-    <motion.div
+    <m.div
+      suppressHydrationWarning
       className="flex flex-col gap-3"
       animate={shake ? { x: [0, -8, 8, -8, 0] } : { x: 0 }}
       transition={{ duration: 0.3 }}
@@ -74,6 +74,6 @@ export function ChoiceQuestion({ question, value, onChange, onSubmit, disabled }
           </button>
         )
       })}
-    </motion.div>
+    </m.div>
   )
 }
