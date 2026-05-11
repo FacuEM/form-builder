@@ -180,6 +180,8 @@ export function FormPlayer({ form }: Props) {
                 onChange={(val) => setAnswer(currentQuestion.id, val)}
                 onSubmit={handleSubmit}
                 submitting={submitting}
+                formId={form.id}
+                responseId={responseId}
               />
             )}
           </AnimatePresence>

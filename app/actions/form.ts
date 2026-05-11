@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/db'
 import { createClient } from '@/lib/supabase/server'
+import { FormSchema, type FormJson } from '@/lib/formSchema'
 
 async function getUser() {
   const supabase = await createClient()
@@ -67,6 +68,8 @@ export async function updateQuestion(
     scored?: boolean
     textInputType?: 'text' | 'email' | 'phone' | 'url' | null
     placeholder?: string | null
+    allowOther?: boolean
+    mediaTypes?: string | null
   }
 ) {
   const user = await getUser()
@@ -123,4 +126,106 @@ export async function deleteChoice(choiceId: string, formId: string) {
   const user = await getUser()
   await prisma.form.findFirstOrThrow({ where: { id: formId, creatorId: user.id } })
   await prisma.choice.delete({ where: { id: choiceId } })
+}
+
+// --- Import / export ---
+
+export async function exportFormAsJson(formId: string): Promise<FormJson> {
+  const user = await getUser()
+  const form = await prisma.form.findFirstOrThrow({
+    where: { id: formId, creatorId: user.id },
+    include: {
+      questions: {
+        where: { type: { notIn: ['STATEMENT', 'WELCOME'] } },
+        orderBy: { order: 'asc' },
+        include: { choices: { orderBy: { order: 'asc' } } },
+      },
+    },
+  })
+
+  return {
+    name: form.title,
+    welcome: {
+      enabled: form.welcomeEnabled,
+      title: form.welcomeTitle,
+      description: form.welcomeDescription ?? undefined,
+      alertText: form.welcomeAlert ?? undefined,
+    },
+    thankYou: {
+      enabled: form.thankYouEnabled,
+      title: form.thankYouTitle,
+      message: form.thankYouMessage,
+    },
+    questions: form.questions.map((q) => ({
+      type: q.type as FormJson['questions'][number]['type'],
+      text: q.text,
+      description: q.description ?? undefined,
+      required: q.required,
+      textInputType: (q.textInputType ?? undefined) as FormJson['questions'][number]['textInputType'],
+      placeholder: q.placeholder ?? undefined,
+      allowOther: q.allowOther || undefined,
+      scored: q.scored || undefined,
+      mediaTypes: q.mediaTypes ?? undefined,
+      choices: q.choices.length > 0
+        ? q.choices.map((c) => ({ label: c.label, weight: c.weight }))
+        : undefined,
+    })),
+  }
+}
+
+export async function importFormFromJson(raw: unknown): Promise<string> {
+  const user = await getUser()
+
+  const parsed = FormSchema.safeParse(raw)
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; '))
+  }
+  const json = parsed.data
+
+  const form = await prisma.form.create({
+    data: {
+      title: json.name,
+      creatorId: user.id,
+      welcomeEnabled: json.welcome?.enabled ?? true,
+      welcomeTitle: json.welcome?.title ?? 'Welcome',
+      welcomeDescription: json.welcome?.description ?? null,
+      welcomeAlert: json.welcome?.alertText ?? null,
+      thankYouEnabled: json.thankYou?.enabled ?? true,
+      thankYouTitle: json.thankYou?.title ?? 'Thank you!',
+      thankYouMessage: json.thankYou?.message ?? 'Your response has been recorded.',
+    },
+  })
+
+  for (let i = 0; i < json.questions.length; i++) {
+    const q = json.questions[i]
+    const question = await prisma.question.create({
+      data: {
+        formId: form.id,
+        order: i,
+        text: q.text,
+        description: q.description ?? null,
+        type: q.type,
+        required: q.required,
+        scored: q.scored ?? false,
+        textInputType: q.textInputType ?? null,
+        placeholder: q.placeholder ?? null,
+        allowOther: q.allowOther ?? false,
+        mediaTypes: q.mediaTypes ?? null,
+      },
+    })
+
+    if (q.choices?.length) {
+      await prisma.choice.createMany({
+        data: q.choices.map((c, j) => ({
+          questionId: question.id,
+          label: c.label,
+          weight: c.weight,
+          order: j,
+        })),
+      })
+    }
+  }
+
+  revalidatePath('/dashboard')
+  return form.id
 }

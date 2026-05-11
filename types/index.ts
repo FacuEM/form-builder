@@ -1,4 +1,4 @@
-export type QuestionType = 'TEXT' | 'LONG_TEXT' | 'CHOICE' | 'DROPDOWN' | 'MULTI_SELECT' | 'STATEMENT' | 'WELCOME'
+export type QuestionType = 'TEXT' | 'LONG_TEXT' | 'CHOICE' | 'DROPDOWN' | 'MULTI_SELECT' | 'STATEMENT' | 'WELCOME' | 'MEDIA'
 
 export type TextInputType = 'text' | 'email' | 'phone' | 'url'
 
@@ -22,6 +22,8 @@ export interface Question {
   choices: Choice[]
   textInputType?: TextInputType | null
   placeholder?: string | null
+  allowOther?: boolean
+  mediaTypes?: string | null
 }
 
 export interface Form {

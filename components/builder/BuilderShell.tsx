@@ -15,6 +15,8 @@ import {
   createChoice,
   updateChoice,
   deleteChoice,
+  exportFormAsJson,
+  importFormFromJson,
 } from '@/app/actions/form'
 import type { Form, Question, Choice } from '@/types'
 
@@ -26,12 +28,17 @@ interface Props {
 type Tab = 'questions' | 'settings'
 
 export function BuilderShell({ form, hasResponses }: Props) {
-  const { refresh } = useRouter()
+  const router = useRouter()
+  const { refresh } = router
   const [questions, setQuestions] = useState<Question[]>(form.questions)
   const [selectedId, setSelectedId] = useState<string | null>(form.questions[0]?.id ?? null)
   const [tab, setTab] = useState<Tab>('questions')
   const [mobileView, setMobileView] = useState<'list' | 'editor'>('list')
   const [copied, setCopied] = useState(false)
+  const [showImport, setShowImport] = useState(false)
+  const [importText, setImportText] = useState('')
+  const [importError, setImportError] = useState<string | null>(null)
+  const [importing, setImporting] = useState(false)
 
   useEffect(() => {
     setQuestions(form.questions)
@@ -47,7 +54,7 @@ export function BuilderShell({ form, hasResponses }: Props) {
     refresh()
   }
 
-  async function handleUpdateQuestion(questionId: string, data: { text?: string; description?: string; required?: boolean; scored?: boolean; textInputType?: 'text' | 'email' | 'phone' | 'url' | null; placeholder?: string | null }) {
+  async function handleUpdateQuestion(questionId: string, data: { text?: string; description?: string; required?: boolean; scored?: boolean; textInputType?: 'text' | 'email' | 'phone' | 'url' | null; placeholder?: string | null; allowOther?: boolean; mediaTypes?: string | null }) {
     setQuestions((prev) => prev.map((q) => (q.id === questionId ? { ...q, ...data } : q)))
     await updateQuestion(questionId, form.id, data)
     refresh()
@@ -132,6 +139,44 @@ export function BuilderShell({ form, hasResponses }: Props) {
     refresh()
   }
 
+  async function handleExport() {
+    const json = await exportFormAsJson(form.id)
+    const blob = new Blob([JSON.stringify(json, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${form.title.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.json`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  async function handleImportSubmit() {
+    setImportError(null)
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(importText)
+    } catch {
+      setImportError('Invalid JSON — please check the format.')
+      return
+    }
+    setImporting(true)
+    try {
+      const newFormId = await importFormFromJson(parsed)
+      router.push(`/dashboard/forms/${newFormId}/edit`)
+    } catch (err) {
+      setImportError(err instanceof Error ? err.message : 'Import failed')
+      setImporting(false)
+    }
+  }
+
+  async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const text = await file.text()
+    setImportText(text)
+    setImportError(null)
+  }
+
   async function copyShareLink() {
     const url = `${window.location.origin}/forms/${form.id}`
     await navigator.clipboard.writeText(url)
@@ -182,6 +227,20 @@ export function BuilderShell({ form, hasResponses }: Props) {
           >
             Responses
           </Link>
+          <button
+            onClick={handleExport}
+            title="Export form as JSON"
+            className="text-white/50 hover:text-white text-xs sm:text-sm transition-colors"
+          >
+            Export
+          </button>
+          <button
+            onClick={() => { setShowImport(true); setImportText(''); setImportError(null) }}
+            title="Import form from JSON"
+            className="text-white/50 hover:text-white text-xs sm:text-sm transition-colors"
+          >
+            Import
+          </button>
         </div>
       </header>
 
@@ -282,6 +341,74 @@ export function BuilderShell({ form, hasResponses }: Props) {
           )}
         </main>
       </div>
+
+      {/* Import modal */}
+      {showImport && (
+        <>
+          <div
+            role="button"
+            tabIndex={-1}
+            aria-label="Close"
+            className="fixed inset-0 bg-black/60 z-40"
+            onClick={() => setShowImport(false)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setShowImport(false) }}
+          />
+          <div className="fixed inset-0 flex items-center justify-center z-50 px-4">
+            <div className="bg-[#0d0d0d] border border-white/10 rounded-xl w-full max-w-lg p-6 flex flex-col gap-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-white text-sm font-medium">Import form from JSON</h2>
+                <button
+                  onClick={() => setShowImport(false)}
+                  className="text-white/40 hover:text-white transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <label className="flex flex-col gap-1.5">
+                <span className="text-white/40 text-xs uppercase tracking-wider">Upload file</span>
+                <input
+                  type="file"
+                  accept=".json,application/json"
+                  onChange={handleImportFile}
+                  className="text-white/60 text-sm file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-white/10 file:text-white file:text-xs hover:file:bg-white/20 file:cursor-pointer"
+                />
+              </label>
+
+              <label className="flex flex-col gap-1.5">
+                <span className="text-white/40 text-xs uppercase tracking-wider">Or paste JSON</span>
+                <textarea
+                  value={importText}
+                  onChange={(e) => { setImportText(e.target.value); setImportError(null) }}
+                  rows={8}
+                  placeholder='{"name": "My Form", "questions": [...]}'
+                  className="w-full bg-white/5 border border-white/10 rounded-lg text-white/80 text-xs font-mono p-3 outline-none focus:border-white/30 resize-none placeholder:text-white/20"
+                />
+              </label>
+
+              {importError && (
+                <p className="text-red-400/80 text-sm">{importError}</p>
+              )}
+
+              <div className="flex gap-2 justify-end">
+                <button
+                  onClick={() => setShowImport(false)}
+                  className="px-4 py-2 text-white/50 hover:text-white text-sm transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleImportSubmit}
+                  disabled={!importText.trim() || importing}
+                  className="px-4 py-2 bg-white text-black text-sm font-medium rounded-lg disabled:opacity-40 hover:bg-white/90 transition-colors"
+                >
+                  {importing ? 'Importing…' : 'Import & open'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   )
 }

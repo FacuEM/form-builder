@@ -9,6 +9,7 @@ const TYPES = [
   { value: 'CHOICE', label: 'Choice' },
   { value: 'DROPDOWN', label: 'Dropdown' },
   { value: 'MULTI_SELECT', label: 'Multi-select' },
+  { value: 'MEDIA', label: 'Media upload' },
   { value: 'STATEMENT', label: 'Title' },
 ] as const
 
@@ -17,6 +18,13 @@ type QuestionType = (typeof TYPES)[number]['value']
 const CONTENT_ONLY_TYPES = new Set<QuestionType>(['STATEMENT'])
 const TEXT_INPUT_TYPES = new Set<QuestionType>(['TEXT', 'LONG_TEXT'])
 const CHOICE_TYPES = new Set<QuestionType>(['CHOICE', 'DROPDOWN', 'MULTI_SELECT'])
+const ALLOW_OTHER_TYPES = new Set<QuestionType>(['CHOICE', 'MULTI_SELECT'])
+
+const MEDIA_TYPE_OPTIONS = [
+  { value: 'image/*,video/*', label: 'Images & Videos' },
+  { value: 'image/*', label: 'Images only' },
+  { value: 'video/*', label: 'Videos only' },
+]
 
 const TEXT_SUBTYPES: { value: TextInputType; label: string; hint: string }[] = [
   { value: 'text',  label: 'Plain text', hint: 'Any text' },
@@ -36,6 +44,8 @@ interface Props {
       scored?: boolean
       textInputType?: TextInputType | null
       placeholder?: string | null
+      allowOther?: boolean
+      mediaTypes?: string | null
     }
   ) => void
   onUpdateQuestionType: (id: string, type: Question['type'], deleteChoices: boolean) => void
@@ -178,6 +188,32 @@ export function QuestionEditor({
         )}
       </div>
 
+      {/* Media accepted types (MEDIA only) */}
+      {localType === 'MEDIA' && (
+        <div>
+          <p className="text-white/40 text-xs uppercase tracking-wider mb-2">Accepted file types</p>
+          <div className="flex flex-col gap-1.5">
+            {MEDIA_TYPE_OPTIONS.map((opt) => {
+              const current = question.mediaTypes ?? 'image/*,video/*'
+              const selected = current === opt.value
+              return (
+                <button
+                  key={opt.value}
+                  onClick={() => onUpdateQuestion(question.id, { mediaTypes: opt.value })}
+                  className={`px-3 py-2 rounded-lg text-sm text-left transition-colors ${
+                    selected
+                      ? 'bg-white text-black'
+                      : 'bg-white/5 text-white/60 hover:bg-white/10 hover:text-white'
+                  }`}
+                >
+                  {opt.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
       {/* Text input subtype picker (TEXT only) */}
       {localType === 'TEXT' && (
         <div>
@@ -248,6 +284,28 @@ export function QuestionEditor({
               + Add option
             </button>
           </div>
+
+          {/* Allow Other toggle — CHOICE and MULTI_SELECT only */}
+          {ALLOW_OTHER_TYPES.has(localType) && (
+            <div className="flex items-center justify-between mt-4">
+              <div>
+                <p className="text-white/70 text-sm">Allow "Other" option</p>
+                <p className="text-white/30 text-xs mt-0.5">Respondents can type a custom answer</p>
+              </div>
+              <button
+                onClick={() => onUpdateQuestion(question.id, { allowOther: !question.allowOther })}
+                className={`w-11 h-6 rounded-full transition-colors relative shrink-0 ${
+                  question.allowOther ? 'bg-white' : 'bg-white/20'
+                }`}
+              >
+                <span
+                  className={`absolute top-1 w-4 h-4 rounded-full transition-all ${
+                    question.allowOther ? 'left-6 bg-black' : 'left-1 bg-white/60'
+                  }`}
+                />
+              </button>
+            </div>
+          )}
 
           {/* Score toggle — not available for MULTI_SELECT */}
           {localType !== 'MULTI_SELECT' && (

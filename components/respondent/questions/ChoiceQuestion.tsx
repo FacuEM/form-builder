@@ -1,13 +1,15 @@
 'use client'
 
 import { m } from 'framer-motion'
-import { useEffect, useSyncExternalStore, useState } from 'react'
+import { useEffect, useSyncExternalStore, useState, useRef } from 'react'
 import type { Question } from '@/types'
 import { detectTouchDevice } from '@/lib/touchDetect'
 
 const subscribe = () => () => {}
 const useTouchDevice = () =>
   useSyncExternalStore(subscribe, detectTouchDevice, () => false)
+
+const OTHER_PREFIX = '__other__: '
 
 interface Props {
   question: Question
@@ -22,10 +24,15 @@ const KEY_MAP: Record<string, number> = { a: 0, b: 1, c: 2, d: 3 }
 export function ChoiceQuestion({ question, value, onChange, onSubmit, disabled }: Props) {
   const [shake, setShake] = useState(false)
   const isTouchDevice = useTouchDevice()
+  const otherInputRef = useRef<HTMLInputElement>(null)
+
+  const isOtherSelected = value.startsWith(OTHER_PREFIX)
+  const otherText = isOtherSelected ? value.slice(OTHER_PREFIX.length) : ''
 
   useEffect(() => {
     if (isTouchDevice) return
     function onKeyDown(e: KeyboardEvent) {
+      if (e.target === otherInputRef.current) return
       const key = e.key.toLowerCase()
       if (key in KEY_MAP) {
         const choice = question.choices[KEY_MAP[key]]
@@ -44,6 +51,11 @@ export function ChoiceQuestion({ question, value, onChange, onSubmit, disabled }
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [isTouchDevice, question.choices, question.required, value, onChange, onSubmit])
 
+  function selectOther() {
+    onChange(OTHER_PREFIX)
+    setTimeout(() => otherInputRef.current?.focus(), 0)
+  }
+
   return (
     <m.div
       suppressHydrationWarning
@@ -60,9 +72,7 @@ export function ChoiceQuestion({ question, value, onChange, onSubmit, disabled }
           <button
             key={choice.id}
             disabled={disabled}
-            onClick={() => {
-              onChange(choice.label)
-            }}
+            onClick={() => onChange(choice.label)}
             className={`flex items-center gap-3 px-4 py-3 rounded-lg border text-left transition-all duration-150 ${
               selected
                 ? 'border-white bg-white/10 text-white'
@@ -74,6 +84,38 @@ export function ChoiceQuestion({ question, value, onChange, onSubmit, disabled }
           </button>
         )
       })}
+
+      {question.allowOther && (
+        <div
+          className={`flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-150 ${
+            isOtherSelected
+              ? 'border-white bg-white/10'
+              : 'border-white/20 text-white/70 hover:border-white/50'
+          }`}
+        >
+          <button
+            disabled={disabled}
+            onClick={selectOther}
+            className="flex items-center gap-3 flex-1 text-left"
+          >
+            <span className="text-xs font-mono opacity-60 w-5 shrink-0">
+              {['A', 'B', 'C', 'D'][question.choices.length] ?? String(question.choices.length + 1)}
+            </span>
+            {!isOtherSelected && <span className="text-white/70">Other…</span>}
+          </button>
+          {isOtherSelected && (
+            <input
+              ref={otherInputRef}
+              type="text"
+              value={otherText}
+              onChange={(e) => onChange(OTHER_PREFIX + e.target.value)}
+              placeholder="Please specify…"
+              disabled={disabled}
+              className="flex-1 bg-transparent text-white outline-none placeholder:text-white/30 text-sm"
+            />
+          )}
+        </div>
+      )}
     </m.div>
   )
 }

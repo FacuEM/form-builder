@@ -7,6 +7,7 @@ import { TextQuestion } from './questions/TextQuestion'
 import { ChoiceQuestion } from './questions/ChoiceQuestion'
 import { DropdownQuestion } from './questions/DropdownQuestion'
 import { MultiSelectQuestion } from './questions/MultiSelectQuestion'
+import { MediaQuestion } from './questions/MediaQuestion'
 import { NavigationHint } from './NavigationHint'
 
 const variants = {
@@ -26,6 +27,8 @@ interface Props {
   onChange: (value: string) => void
   onSubmit: (value?: string) => void
   submitting: boolean
+  formId: string
+  responseId: string | null
 }
 
 export function QuestionSlide({
@@ -37,6 +40,8 @@ export function QuestionSlide({
   onChange,
   onSubmit,
   submitting,
+  formId,
+  responseId,
 }: Props) {
   return (
     <m.div
@@ -71,6 +76,16 @@ export function QuestionSlide({
       )}
       {question.type === 'MULTI_SELECT' && (
         <MultiSelectQuestion question={question} value={value} onChange={onChange} onSubmit={onSubmit} disabled={submitting} />
+      )}
+      {question.type === 'MEDIA' && (
+        <MediaQuestion
+          question={question}
+          value={value}
+          onChange={onChange}
+          formId={formId}
+          responseId={responseId ?? formId}
+          disabled={submitting}
+        />
       )}
       {question.type !== 'STATEMENT' && (
         <NavigationHint

@@ -6,6 +6,19 @@ import { ResponseDetail } from './ResponseDetail'
 import { hasAnyScoredQuestion, totalScore } from '@/lib/scoring'
 import type { Question } from '@/types'
 
+function formatCellValue(value: string): string {
+  if (value.startsWith('__other__: ')) return `Other: ${value.slice('__other__: '.length)}`
+  try {
+    const parsed = JSON.parse(value)
+    if (Array.isArray(parsed)) {
+      return parsed.map((v: string) =>
+        v.startsWith('__other__: ') ? `Other: ${v.slice('__other__: '.length)}` : v
+      ).join('; ')
+    }
+  } catch {}
+  return value
+}
+
 interface Answer {
   id: string
   questionId: string
@@ -81,6 +94,13 @@ export function ResponsesShell({ form, questions, responses }: Props) {
               <p className="text-white/40 text-xs">
                 {responses.length} response{responses.length !== 1 ? 's' : ''}
               </p>
+              <div className="flex items-center gap-3">
+              <a
+                href={`/api/forms/${form.id}/responses/export`}
+                className="text-white/50 hover:text-white text-xs px-3 py-1.5 border border-white/10 rounded-lg hover:border-white/30 transition-colors"
+              >
+                Download CSV
+              </a>
               {showScores && (
                 <div className="flex items-center gap-2 text-xs">
                   <span className="text-white/40">Sort by</span>
@@ -99,6 +119,7 @@ export function ResponsesShell({ form, questions, responses }: Props) {
                   ))}
                 </div>
               )}
+              </div>
             </div>
             <div className="relative">
               <div className="overflow-x-auto">
@@ -153,7 +174,9 @@ export function ResponsesShell({ form, questions, responses }: Props) {
                         {questions.map((q) => (
                           <td key={q.id} className="py-3 pr-6 text-white/80 max-w-[180px]">
                             <span className="truncate block">
-                              {answerMap[q.id] ?? <span className="text-white/20">-</span>}
+                              {answerMap[q.id]
+                                ? formatCellValue(answerMap[q.id])
+                                : <span className="text-white/20">-</span>}
                             </span>
                           </td>
                         ))}

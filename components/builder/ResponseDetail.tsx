@@ -4,6 +4,21 @@ import { useEffect } from 'react'
 import type { Question } from '@/types'
 import { hasAnyScoredQuestion, totalScore, weightForAnswer } from '@/lib/scoring'
 
+function formatAnswerValue(value: string | undefined): string | undefined {
+  if (!value) return value
+  if (value.startsWith('__other__: ')) return `Other: ${value.slice('__other__: '.length)}`
+  // Multi-select: JSON array → semicolon-separated
+  try {
+    const parsed = JSON.parse(value)
+    if (Array.isArray(parsed)) {
+      return parsed.map((v: string) =>
+        v.startsWith('__other__: ') ? `Other: ${v.slice('__other__: '.length)}` : v
+      ).join('; ')
+    }
+  } catch {}
+  return value
+}
+
 interface Answer {
   id: string
   questionId: string
@@ -89,7 +104,7 @@ export function ResponseDetail({ response, questions, onClose }: Props) {
                 </p>
                 <div className="flex items-center gap-2">
                   <p className="text-white text-sm">
-                    {value ?? <span className="text-white/20 italic">No answer</span>}
+                    {formatAnswerValue(value) ?? <span className="text-white/20 italic">No answer</span>}
                   </p>
                   {weight != null && (
                     <span className="text-xs font-mono px-1.5 py-0.5 rounded bg-white/10 text-white/70">
