@@ -57,7 +57,18 @@ export async function createQuestion(formId: string) {
   })
 }
 
-export async function updateQuestion(questionId: string, formId: string, data: { text?: string; description?: string; required?: boolean; scored?: boolean }) {
+export async function updateQuestion(
+  questionId: string,
+  formId: string,
+  data: {
+    text?: string
+    description?: string
+    required?: boolean
+    scored?: boolean
+    textInputType?: 'text' | 'email' | 'phone' | 'url' | null
+    placeholder?: string | null
+  }
+) {
   const user = await getUser()
   await prisma.form.findFirstOrThrow({ where: { id: formId, creatorId: user.id } })
   await prisma.question.update({ where: { id: questionId }, data })

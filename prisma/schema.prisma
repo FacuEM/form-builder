@@ -27,17 +27,19 @@ model Form {
 }
 
 model Question {
-  id          String       @id @default(cuid())
-  formId      String
-  order       Int
-  text        String
-  description String?
-  type        QuestionType
-  required    Boolean      @default(true)
-  scored      Boolean      @default(false)
-  choices     Choice[]
-  answers     Answer[]
-  form        Form         @relation(fields: [formId], references: [id], onDelete: Cascade)
+  id            String        @id @default(cuid())
+  formId        String
+  order         Int
+  text          String
+  description   String?
+  type          QuestionType
+  required      Boolean       @default(true)
+  scored        Boolean       @default(false)
+  textInputType TextInputType?
+  placeholder   String?
+  choices       Choice[]
+  answers       Answer[]
+  form          Form          @relation(fields: [formId], references: [id], onDelete: Cascade)
 }
 
 model Choice {
@@ -79,6 +81,14 @@ enum QuestionType {
   LONG_TEXT
   CHOICE
   DROPDOWN
+  MULTI_SELECT
   STATEMENT
   WELCOME
+}
+
+enum TextInputType {
+  text
+  email
+  phone
+  url
 }

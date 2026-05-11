@@ -1,4 +1,6 @@
-export type QuestionType = 'TEXT' | 'LONG_TEXT' | 'CHOICE' | 'DROPDOWN' | 'STATEMENT' | 'WELCOME'
+export type QuestionType = 'TEXT' | 'LONG_TEXT' | 'CHOICE' | 'DROPDOWN' | 'MULTI_SELECT' | 'STATEMENT' | 'WELCOME'
+
+export type TextInputType = 'text' | 'email' | 'phone' | 'url'
 
 export interface Choice {
   id: string
@@ -18,6 +20,8 @@ export interface Question {
   required: boolean
   scored: boolean
   choices: Choice[]
+  textInputType?: TextInputType | null
+  placeholder?: string | null
 }
 
 export interface Form {
