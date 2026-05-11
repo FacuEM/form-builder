@@ -12,6 +12,7 @@ model Form {
   title                String
   creatorId            String
   published            Boolean    @default(false)
+  closed               Boolean    @default(false)
   welcomeEnabled       Boolean    @default(true)
   welcomeTitle         String     @default("Welcome")
   welcomeDescription   String?

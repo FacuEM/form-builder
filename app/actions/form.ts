@@ -34,6 +34,7 @@ export async function createForm() {
 export async function updateForm(formId: string, data: {
   title?: string
   published?: boolean
+  closed?: boolean
   welcomeEnabled?: boolean
   welcomeTitle?: string
   welcomeDescription?: string

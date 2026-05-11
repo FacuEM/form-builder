@@ -23,6 +23,7 @@ export function SettingsPanel({ form }: Props) {
   const [welcomeEnabled, setWelcomeEnabled] = useState(form.welcomeEnabled)
   const [thankYouEnabled, setThankYouEnabled] = useState(form.thankYouEnabled)
   const [published, setPublished] = useState(form.published)
+  const [closed, setClosed] = useState(form.closed)
   const origin = typeof window !== 'undefined' ? window.location.origin : ''
 
   return (
@@ -151,16 +152,33 @@ export function SettingsPanel({ form }: Props) {
         </div>
 
         {published && (
-          <div className="pl-3 border-l border-white/10">
-            <p className="text-white/40 text-xs uppercase tracking-wider mb-1.5">Shareable link</p>
-            <a
-              href={`${origin}/forms/${form.id}`}
-              target="_blank"
-              rel="noreferrer"
-              className="text-white/60 text-sm hover:text-white transition-colors break-all underline underline-offset-2"
-            >
-              {origin}/forms/{form.id}
-            </a>
+          <div className="flex flex-col gap-3 pl-3 border-l border-white/10">
+            <div>
+              <p className="text-white/40 text-xs uppercase tracking-wider mb-1.5">Shareable link</p>
+              <a
+                href={`${origin}/forms/${form.id}`}
+                target="_blank"
+                rel="noreferrer"
+                className="text-white/60 text-sm hover:text-white transition-colors break-all underline underline-offset-2"
+              >
+                {origin}/forms/{form.id}
+              </a>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-white text-sm font-medium">Accepting responses</p>
+                <p className="text-white/40 text-xs mt-0.5">Turn off to stop new submissions</p>
+              </div>
+              <Toggle
+                enabled={!closed}
+                onToggle={() => {
+                  const next = !closed
+                  setClosed(next)
+                  updateForm(form.id, { closed: next })
+                }}
+              />
+            </div>
           </div>
         )}
       </section>

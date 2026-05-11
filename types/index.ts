@@ -31,6 +31,7 @@ export interface Form {
   title: string
   creatorId: string
   published: boolean
+  closed: boolean
   welcomeEnabled: boolean
   welcomeTitle: string
   welcomeDescription?: string | null

@@ -20,6 +20,7 @@ export async function POST(request: Request, { params }: Params) {
   })
   if (!form) return NextResponse.json({ error: 'Not found' }, { status: 404 })
   if (!form.published) return NextResponse.json({ error: 'Form not published' }, { status: 403 })
+  if (form.closed) return NextResponse.json({ error: 'Form is closed' }, { status: 403 })
 
   const body = await request.json().catch(() => null)
   if (!body || typeof body !== 'object') {
