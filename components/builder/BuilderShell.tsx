@@ -39,6 +39,8 @@ export function BuilderShell({ form, hasResponses }: Props) {
   const [importText, setImportText] = useState('')
   const [importError, setImportError] = useState<string | null>(null)
   const [importing, setImporting] = useState(false)
+  const [showPrompt, setShowPrompt] = useState(false)
+  const [promptCopied, setPromptCopied] = useState(false)
 
   useEffect(() => {
     setQuestions(form.questions)
@@ -167,6 +169,48 @@ export function BuilderShell({ form, hasResponses }: Props) {
       setImportError(err instanceof Error ? err.message : 'Import failed')
       setImporting(false)
     }
+  }
+
+  const AI_PROMPT = `Generate a form as valid JSON using this exact schema. Return ONLY the JSON object — no explanation, no markdown fences.
+
+Schema:
+{
+  "name": "string — form title (required)",
+  "welcome": {
+    "enabled": true,
+    "title": "string",
+    "description": "string (optional)",
+    "alertText": "string (optional)"
+  },
+  "thankYou": {
+    "enabled": true,
+    "title": "string",
+    "message": "string"
+  },
+  "questions": [
+    {
+      "type": "TEXT | LONG_TEXT | CHOICE | DROPDOWN | MULTI_SELECT | MEDIA",
+      "text": "string — question shown to respondent (required)",
+      "description": "string — optional hint below question",
+      "required": false,
+      "textInputType": "text | email | phone | url",   // TEXT only, optional
+      "placeholder": "string",                          // TEXT or LONG_TEXT only, optional
+      "allowOther": false,                              // CHOICE or MULTI_SELECT only, optional
+      "scored": false,                                  // CHOICE or DROPDOWN only, optional
+      "mediaTypes": "image/*,video/*",                  // MEDIA only, optional
+      "choices": [                                      // required for CHOICE, DROPDOWN, MULTI_SELECT
+        { "label": "string", "weight": 0 }
+      ]
+    }
+  ]
+}
+
+Create a form about: [DESCRIBE YOUR FORM TOPIC HERE]`
+
+  async function copyPrompt() {
+    await navigator.clipboard.writeText(AI_PROMPT)
+    setPromptCopied(true)
+    setTimeout(() => setPromptCopied(false), 2000)
   }
 
   async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -363,6 +407,34 @@ export function BuilderShell({ form, hasResponses }: Props) {
                 >
                   ✕
                 </button>
+              </div>
+
+              {/* AI prompt helper */}
+              <div className="border border-white/10 rounded-lg overflow-hidden">
+                <button
+                  onClick={() => setShowPrompt((v) => !v)}
+                  className="w-full flex items-center justify-between px-4 py-3 text-left hover:bg-white/3 transition-colors"
+                >
+                  <div>
+                    <span className="text-white/70 text-sm">Generate with AI</span>
+                    <span className="text-white/30 text-xs ml-2">copy prompt → paste into any AI agent</span>
+                  </div>
+                  <span className="text-white/30 text-xs">{showPrompt ? '▲' : '▼'}</span>
+                </button>
+
+                {showPrompt && (
+                  <div className="border-t border-white/10 p-3 flex flex-col gap-2">
+                    <pre className="text-white/50 text-xs font-mono whitespace-pre-wrap leading-relaxed bg-white/3 rounded p-3 max-h-48 overflow-y-auto">
+                      {AI_PROMPT}
+                    </pre>
+                    <button
+                      onClick={copyPrompt}
+                      className="self-end text-xs px-3 py-1.5 bg-white/10 hover:bg-white/20 text-white/70 hover:text-white rounded transition-colors"
+                    >
+                      {promptCopied ? '✓ Copied' : 'Copy prompt'}
+                    </button>
+                  </div>
+                )}
               </div>
 
               <label className="flex flex-col gap-1.5">
