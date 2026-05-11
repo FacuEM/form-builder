@@ -6,6 +6,7 @@ import type { Question } from '@/types'
 import { TextQuestion } from './questions/TextQuestion'
 import { ChoiceQuestion } from './questions/ChoiceQuestion'
 import { DropdownQuestion } from './questions/DropdownQuestion'
+import { MultiSelectQuestion } from './questions/MultiSelectQuestion'
 import { NavigationHint } from './NavigationHint'
 
 const variants = {
@@ -67,6 +68,9 @@ export function QuestionSlide({
       )}
       {question.type === 'DROPDOWN' && (
         <DropdownQuestion question={question} value={value} onChange={onChange} onSubmit={onSubmit} disabled={submitting} />
+      )}
+      {question.type === 'MULTI_SELECT' && (
+        <MultiSelectQuestion question={question} value={value} onChange={onChange} onSubmit={onSubmit} disabled={submitting} />
       )}
       {question.type !== 'STATEMENT' && (
         <NavigationHint

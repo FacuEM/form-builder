@@ -12,9 +12,58 @@ interface Props {
   disabled?: boolean
 }
 
+// Validation helpers
+function validateEmail(v: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())
+}
+
+function validatePhone(v: string) {
+  // Allow digits, spaces, +, -, (, )  — at least 6 digits
+  const digits = v.replace(/\D/g, '')
+  return digits.length >= 6 && /^[+\d\s\-().]+$/.test(v.trim())
+}
+
+function validateUrl(v: string) {
+  try {
+    const url = new URL(v.trim().startsWith('http') ? v.trim() : `https://${v.trim()}`)
+    return url.protocol === 'http:' || url.protocol === 'https:'
+  } catch {
+    return false
+  }
+}
+
+function getValidationError(question: Question, value: string): string | null {
+  if (!value.trim()) return null // empty handled by required check
+  const sub = question.textInputType
+  if (sub === 'email' && !validateEmail(value)) return 'Please enter a valid email address'
+  if (sub === 'phone' && !validatePhone(value)) return 'Please enter a valid phone number'
+  if (sub === 'url'   && !validateUrl(value))   return 'Please enter a valid URL (e.g. https://example.com)'
+  return null
+}
+
+// Map our TextInputType to an HTML input type
+function htmlInputType(q: Question): string {
+  switch (q.textInputType) {
+    case 'email': return 'email'
+    case 'phone': return 'tel'
+    case 'url':   return 'url'
+    default:      return 'text'
+  }
+}
+
+function defaultPlaceholder(q: Question): string {
+  switch (q.textInputType) {
+    case 'email': return 'name@example.com'
+    case 'phone': return '+1 (555) 000-0000'
+    case 'url':   return 'https://example.com'
+    default:      return 'Type your answer…'
+  }
+}
+
 export function TextQuestion({ question, value, onChange, onSubmit, disabled }: Props) {
   const [shake, setShake] = useState(false)
-  const inputRef = useRef<HTMLInputElement | null>(null)
+  const [validationError, setValidationError] = useState<string | null>(null)
+  const inputRef    = useRef<HTMLInputElement | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
   useEffect(() => {
@@ -23,21 +72,35 @@ export function TextQuestion({ question, value, onChange, onSubmit, disabled }: 
     } else {
       inputRef.current?.focus()
     }
+    setValidationError(null)
   }, [question.id, question.type])
+
+  function handleSubmit() {
+    if (question.required && !value.trim()) {
+      setShake(true)
+      return
+    }
+    const err = getValidationError(question, value)
+    if (err) {
+      setValidationError(err)
+      setShake(true)
+      return
+    }
+    setValidationError(null)
+    onSubmit()
+  }
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
-      if (question.required && !value.trim()) {
-        setShake(true)
-        return
-      }
-      onSubmit()
+      handleSubmit()
     }
   }
 
   const sharedClasses =
     'w-full bg-transparent border-b border-white/20 text-white text-xl placeholder:text-white/30 outline-none pb-2 focus:border-white/60 transition-colors duration-150'
+
+  const placeholder = question.placeholder?.trim() || defaultPlaceholder(question)
 
   return (
     <m.div
@@ -49,24 +112,28 @@ export function TextQuestion({ question, value, onChange, onSubmit, disabled }: 
         <textarea
           ref={textareaRef}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => { onChange(e.target.value); setValidationError(null) }}
           onKeyDown={handleKeyDown}
           disabled={disabled}
-          placeholder="Type your answer..."
+          placeholder={placeholder}
           rows={4}
           className={`${sharedClasses} resize-none`}
         />
       ) : (
         <input
           ref={inputRef}
-          type="text"
+          type={htmlInputType(question)}
+          inputMode={question.textInputType === 'phone' ? 'tel' : question.textInputType === 'url' ? 'url' : question.textInputType === 'email' ? 'email' : 'text'}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => { onChange(e.target.value); setValidationError(null) }}
           onKeyDown={handleKeyDown}
           disabled={disabled}
-          placeholder="Type your answer..."
+          placeholder={placeholder}
           className={sharedClasses}
         />
+      )}
+      {validationError && (
+        <p className="mt-2 text-red-400 text-sm">{validationError}</p>
       )}
     </m.div>
   )
