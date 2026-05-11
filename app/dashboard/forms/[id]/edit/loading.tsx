@@ -9,10 +9,10 @@ export default function EditLoading() {
           <div className="hidden sm:block h-4 w-40 animate-pulse bg-white/10 rounded" />
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <div className="h-4 w-16 animate-pulse bg-white/10 rounded" />
-          <div className="h-4 w-16 animate-pulse bg-white/10 rounded" />
-          <div className="h-4 w-14 animate-pulse bg-white/10 rounded" />
-          <div className="h-4 w-14 animate-pulse bg-white/10 rounded" />
+          <div className="h-4 w-20 animate-pulse bg-white/10 rounded" />
+          <div className="hidden sm:block h-4 w-14 animate-pulse bg-white/10 rounded" />
+          <div className="hidden sm:block h-4 w-14 animate-pulse bg-white/10 rounded" />
+          <div className="hidden sm:block h-4 w-14 animate-pulse bg-white/10 rounded" />
         </div>
       </header>
 

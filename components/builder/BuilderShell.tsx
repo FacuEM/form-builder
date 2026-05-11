@@ -274,14 +274,14 @@ Create a form about: [DESCRIBE YOUR FORM TOPIC HERE]`
           <button
             onClick={handleExport}
             title="Export form as JSON"
-            className="text-white/50 hover:text-white text-xs sm:text-sm transition-colors"
+            className="hidden sm:inline text-white/50 hover:text-white text-sm transition-colors"
           >
             Export
           </button>
           <button
             onClick={() => { setShowImport(true); setImportText(''); setImportError(null) }}
             title="Import form from JSON"
-            className="text-white/50 hover:text-white text-xs sm:text-sm transition-colors"
+            className="hidden sm:inline text-white/50 hover:text-white text-sm transition-colors"
           >
             Import
           </button>

@@ -67,19 +67,19 @@ export function ResponsesShell({ form, questions, responses }: Props) {
 
   return (
     <div className="min-h-screen bg-[#080808]">
-      <header className="flex items-center justify-between px-6 py-4 border-b border-white/10">
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard" className="text-white/40 hover:text-white transition-colors text-sm">
-            ← Dashboard
+      <header className="flex items-center justify-between px-4 sm:px-6 py-4 border-b border-white/10">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0">
+          <Link href="/dashboard" className="text-white/40 hover:text-white transition-colors text-sm shrink-0">
+            ← <span className="hidden sm:inline">Dashboard</span>
           </Link>
-          <span className="text-white/20">·</span>
-          <span className="text-white text-sm">{form.title}</span>
-          <span className="text-white/20">·</span>
-          <span className="text-white/40 text-sm">Responses</span>
+          <span className="hidden sm:inline text-white/20">·</span>
+          <span className="text-white text-sm truncate">{form.title}</span>
+          <span className="hidden sm:inline text-white/20">·</span>
+          <span className="hidden sm:inline text-white/40 text-sm shrink-0">Responses</span>
         </div>
         <Link
           href={`/dashboard/forms/${form.id}/edit`}
-          className="text-white/40 hover:text-white text-sm transition-colors"
+          className="text-white/40 hover:text-white text-sm transition-colors shrink-0"
         >
           Edit form
         </Link>
