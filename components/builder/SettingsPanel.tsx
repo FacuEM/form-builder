@@ -38,11 +38,15 @@ export function SettingsPanel({ form }: Props) {
   }
   const [textDraft, setTextDraft] = useState(initialText)
   const [savedText, setSavedText] = useState(initialText)
+  const [introDraft, setIntroDraft] = useState<Record<string, unknown> | null>(form.introContent)
+  const [introChanged, setIntroChanged] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
 
-  const isDirty = (Object.keys(textDraft) as (keyof typeof textDraft)[]).some(
+  const textDirty = (Object.keys(textDraft) as (keyof typeof textDraft)[]).some(
     (k) => textDraft[k] !== savedText[k]
   )
+  const isDirty = textDirty || introChanged
 
   function setField(key: keyof typeof textDraft) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -53,6 +57,7 @@ export function SettingsPanel({ form }: Props) {
     setSaving(true)
     await updateForm(form.id, {
       introTitle: textDraft.introTitle,
+      introContent: introDraft,
       welcomeTitle: textDraft.welcomeTitle,
       welcomeDescription: textDraft.welcomeDescription,
       welcomeAlert: textDraft.welcomeAlert.trim() || null,
@@ -60,7 +65,10 @@ export function SettingsPanel({ form }: Props) {
       thankYouMessage: textDraft.thankYouMessage,
     })
     setSavedText({ ...textDraft })
+    setIntroChanged(false)
     setSaving(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
   }
 
   return (
@@ -98,7 +106,7 @@ export function SettingsPanel({ form }: Props) {
               <label className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Content</label>
               <IntroductionEditor
                 content={form.introContent}
-                onBlur={(content) => updateForm(form.id, { introContent: content })}
+                onChange={(content) => { setIntroDraft(content); setIntroChanged(true) }}
               />
             </div>
           </div>
@@ -259,15 +267,19 @@ export function SettingsPanel({ form }: Props) {
       </section>
 
       {/* Sticky save footer */}
-      {isDirty && (
-        <div className="sticky bottom-0 bg-[#080808] border-t border-white/10 py-3 -mx-6 sm:-mx-8 px-6 sm:px-8 mt-4">
-          <button
-            onClick={handleSaveText}
-            disabled={saving}
-            className="px-4 py-2 bg-white text-black text-sm font-medium rounded-lg disabled:opacity-50 hover:bg-white/90 transition-colors"
-          >
-            {saving ? 'Saving…' : 'Save changes'}
-          </button>
+      {(isDirty || saved) && (
+        <div className="sticky bottom-0 bg-[#080808] border-t border-white/10 py-3 -mx-6 sm:-mx-8 px-6 sm:px-8 mt-4 flex items-center gap-3">
+          {saved && !isDirty ? (
+            <span className="text-white/60 text-sm">✓ Saved</span>
+          ) : (
+            <button
+              onClick={handleSaveText}
+              disabled={saving}
+              className="px-4 py-2 bg-white text-black text-sm font-medium rounded-lg disabled:opacity-50 hover:bg-white/90 transition-colors"
+            >
+              {saving ? 'Saving…' : 'Save changes'}
+            </button>
+          )}
         </div>
       )}
     </div>

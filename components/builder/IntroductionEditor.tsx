@@ -5,7 +5,8 @@ import StarterKit from '@tiptap/starter-kit'
 
 interface Props {
   content: Record<string, unknown> | null
-  onBlur: (content: Record<string, unknown>) => void
+  onChange?: (content: Record<string, unknown>) => void
+  onBlur?: (content: Record<string, unknown>) => void
 }
 
 type ToolbarButtonProps = {
@@ -33,13 +34,16 @@ function ToolbarButton({ onClick, active, label, title }: ToolbarButtonProps) {
   )
 }
 
-export function IntroductionEditor({ content, onBlur }: Props) {
+export function IntroductionEditor({ content, onChange, onBlur }: Props) {
   const editor = useEditor({
     extensions: [StarterKit],
     content: content ?? undefined,
-    onBlur: ({ editor }) => {
-      onBlur(editor.getJSON() as Record<string, unknown>)
+    onUpdate: ({ editor }) => {
+      onChange?.(editor.getJSON() as Record<string, unknown>)
     },
+    onBlur: onBlur ? ({ editor }) => {
+      onBlur(editor.getJSON() as Record<string, unknown>)
+    } : undefined,
     editorProps: {
       attributes: {
         class:
@@ -107,7 +111,6 @@ export function IntroductionEditor({ content, onBlur }: Props) {
       <div className="border border-white/20 rounded px-3 py-2 focus-within:border-white/40 transition-colors">
         <EditorContent editor={editor} />
       </div>
-      <p className="text-white/30 text-[11px]">Click elsewhere to save changes.</p>
     </div>
   )
 }

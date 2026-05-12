@@ -71,6 +71,7 @@ export function QuestionEditor({
     description: question.description ?? '',
     placeholder: question.placeholder ?? '',
   })
+  const [saved, setSaved] = useState(false)
 
   // Sync when a different question is selected
   useEffect(() => {
@@ -98,6 +99,8 @@ export function QuestionEditor({
       description: draft.description,
       placeholder: draft.placeholder || null,
     })
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2000)
   }, [question.id, draft, onUpdateQuestion])
 
   function handleTypeChange(type: QuestionType) {
@@ -373,14 +376,18 @@ export function QuestionEditor({
       )}
 
       {/* Sticky save footer */}
-      {isDirty && (
-        <div className="sticky bottom-0 bg-[#080808] border-t border-white/10 py-3 -mx-6 sm:-mx-8 px-6 sm:px-8 mt-4">
-          <button
-            onClick={handleSave}
-            className="px-4 py-2 bg-white text-black text-sm font-medium rounded-lg hover:bg-white/90 transition-colors"
-          >
-            Save changes
-          </button>
+      {(isDirty || saved) && (
+        <div className="sticky bottom-0 bg-[#080808] border-t border-white/10 py-3 -mx-6 sm:-mx-8 px-6 sm:px-8 mt-4 flex items-center gap-3">
+          {saved && !isDirty ? (
+            <span className="text-white/60 text-sm">✓ Saved</span>
+          ) : (
+            <button
+              onClick={handleSave}
+              className="px-4 py-2 bg-white text-black text-sm font-medium rounded-lg hover:bg-white/90 transition-colors"
+            >
+              Save changes
+            </button>
+          )}
         </div>
       )}
     </div>
