@@ -1,36 +1,106 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Form Builder
+
+A Typeform-style form builder. Create forms with branching question types, share a public link, and view responses in a dashboard.
+
+Built with Next.js 16 (App Router), React 19, Prisma 7 on Postgres, Supabase Auth, and Tailwind 4.
+
+## Features
+
+- Email + password auth (Supabase)
+- Drag-free question editor with welcome and thank-you screens
+- Question types: short text, long text, single choice, dropdown, statement
+- Optional weighted scoring on choice questions
+- Public share link with one-response-per-respondent enforcement
+- Responses dashboard with per-form table view
+- Row-level security at the database layer (`app/rls.sql`)
+
+## Stack
+
+| Layer    | Choice                                    |
+| -------- | ----------------------------------------- |
+| Framework | Next.js 16 (App Router, Server Actions)  |
+| UI       | React 19, Tailwind CSS 4, Framer Motion  |
+| Database | Postgres via Prisma 7 (`@prisma/adapter-pg`) |
+| Auth     | Supabase (`@supabase/ssr`)               |
+| Tests    | Vitest (unit), Playwright (e2e)          |
 
 ## Getting Started
 
-First, run the development server:
+### 1. Install
+
+```bash
+npm install
+```
+
+`postinstall` runs `prisma generate` automatically.
+
+### 2. Configure environment
+
+Create `.env.local`:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://<project>.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=sb_publishable_...
+DATABASE_URL=postgresql://...:5432/postgres   # pooled, used at runtime
+DIRECT_URL=postgresql://...:5432/postgres     # direct, used by migrations
+```
+
+### 3. Database
+
+Apply schema and row-level security policies:
+
+```bash
+npx prisma migrate deploy
+psql "$DIRECT_URL" -f app/rls.sql
+```
+
+### 4. Run
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open <http://localhost:3000>.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Scripts
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command             | What it does                  |
+| ------------------- | ----------------------------- |
+| `npm run dev`       | Start dev server              |
+| `npm run build`     | Production build              |
+| `npm start`         | Run production build          |
+| `npm test`          | Vitest unit tests             |
+| `npm run test:watch`| Vitest watch mode             |
+| `npm run test:e2e`  | Playwright end-to-end tests   |
 
-## Learn More
+## Project Layout
 
-To learn more about Next.js, take a look at the following resources:
+```
+app/
+  (auth)/         sign-in / sign-up routes
+  actions/        server actions (form CRUD, responses)
+  api/            route handlers
+  dashboard/      authenticated form list + responses
+  forms/[id]/     public form filler
+  rls.sql         Postgres row-level security policies
+components/       shared React components
+hooks/            client hooks
+lib/              prisma client, supabase clients, helpers
+prisma/schema.prisma
+e2e/              Playwright specs
+proxy.ts          Next.js proxy (auth gate, rewrites)
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Testing
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- Unit tests live next to the code as `*.test.ts(x)` and run via Vitest with jsdom.
+- End-to-end specs in `e2e/` exercise the public form flow and dashboard.
+- See [`TEST-PLAN.md`](./TEST-PLAN.md) for the full coverage matrix.
 
-## Deploy on Vercel
+## Design
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+UI tokens, motion, and layout principles live in [`DESIGN.md`](./DESIGN.md).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploy
+
+Deploys cleanly to Vercel. Set the environment variables above in the project, point `DATABASE_URL` at a pooled Postgres connection, and trigger a deployment.

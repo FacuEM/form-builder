@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import type { Question, TextInputType } from '@/types'
 
 const TYPES = [
@@ -66,12 +66,39 @@ export function QuestionEditor({
   const [confirmTypeSwitch, setConfirmTypeSwitch] = useState<QuestionType | null>(null)
   const [localSubtype, setLocalSubtype] = useState<TextInputType>(question.textInputType ?? 'text')
 
+  const [draft, setDraft] = useState({
+    text: question.text,
+    description: question.description ?? '',
+    placeholder: question.placeholder ?? '',
+  })
+
   // Sync when a different question is selected
   useEffect(() => {
     setLocalType(question.type as QuestionType)
     setLocalSubtype(question.textInputType ?? 'text')
     setConfirmTypeSwitch(null)
   }, [question.id, question.type, question.textInputType])
+
+  useEffect(() => {
+    setDraft({
+      text: question.text,
+      description: question.description ?? '',
+      placeholder: question.placeholder ?? '',
+    })
+  }, [question.id])
+
+  const isDirty =
+    draft.text !== question.text ||
+    draft.description !== (question.description ?? '') ||
+    draft.placeholder !== (question.placeholder ?? '')
+
+  const handleSave = useCallback(() => {
+    onUpdateQuestion(question.id, {
+      text: draft.text,
+      description: draft.description,
+      placeholder: draft.placeholder || null,
+    })
+  }, [question.id, draft, onUpdateQuestion])
 
   function handleTypeChange(type: QuestionType) {
     const hasChoices = question.choices.length > 0
@@ -98,9 +125,8 @@ export function QuestionEditor({
         </label>
         <textarea
           id="question-text"
-          key={question.id}
-          defaultValue={question.text}
-          onBlur={(e) => onUpdateQuestion(question.id, { text: e.target.value })}
+          value={draft.text}
+          onChange={(e) => setDraft((d) => ({ ...d, text: e.target.value }))}
           rows={3}
           className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1.5 focus:border-white/60 transition-colors resize-none"
         />
@@ -113,9 +139,8 @@ export function QuestionEditor({
         </label>
         <textarea
           id="question-desc"
-          key={`${question.id}-desc`}
-          defaultValue={question.description ?? ''}
-          onBlur={(e) => onUpdateQuestion(question.id, { description: e.target.value })}
+          value={draft.description}
+          onChange={(e) => setDraft((d) => ({ ...d, description: e.target.value }))}
           rows={2}
           placeholder="Add a description or hint..."
           className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1.5 focus:border-white/60 transition-colors resize-none text-sm placeholder:text-white/20"
@@ -130,12 +155,9 @@ export function QuestionEditor({
           </label>
           <input
             id="question-placeholder"
-            key={`${question.id}-placeholder`}
             type="text"
-            defaultValue={question.placeholder ?? ''}
-            onBlur={(e) =>
-              onUpdateQuestion(question.id, { placeholder: e.target.value || null })
-            }
+            value={draft.placeholder}
+            onChange={(e) => setDraft((d) => ({ ...d, placeholder: e.target.value }))}
             placeholder="e.g. Type your answer here…"
             className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1.5 focus:border-white/60 transition-colors text-sm placeholder:text-white/20"
           />
@@ -346,6 +368,18 @@ export function QuestionEditor({
                 question.required ? 'left-6 bg-black' : 'left-1 bg-white/60'
               }`}
             />
+          </button>
+        </div>
+      )}
+
+      {/* Sticky save footer */}
+      {isDirty && (
+        <div className="sticky bottom-0 bg-[#080808] border-t border-white/10 py-3 -mx-6 sm:-mx-8 px-6 sm:px-8 mt-4">
+          <button
+            onClick={handleSave}
+            className="px-4 py-2 bg-white text-black text-sm font-medium rounded-lg hover:bg-white/90 transition-colors"
+          >
+            Save changes
           </button>
         </div>
       )}

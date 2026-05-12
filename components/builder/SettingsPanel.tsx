@@ -28,6 +28,41 @@ export function SettingsPanel({ form }: Props) {
   const [closed, setClosed] = useState(form.closed)
   const origin = typeof window !== 'undefined' ? window.location.origin : ''
 
+  const initialText = {
+    introTitle: form.introTitle ?? '',
+    welcomeTitle: form.welcomeTitle ?? '',
+    welcomeDescription: form.welcomeDescription ?? '',
+    welcomeAlert: form.welcomeAlert ?? '',
+    thankYouTitle: form.thankYouTitle ?? '',
+    thankYouMessage: form.thankYouMessage ?? '',
+  }
+  const [textDraft, setTextDraft] = useState(initialText)
+  const [savedText, setSavedText] = useState(initialText)
+  const [saving, setSaving] = useState(false)
+
+  const isDirty = (Object.keys(textDraft) as (keyof typeof textDraft)[]).some(
+    (k) => textDraft[k] !== savedText[k]
+  )
+
+  function setField(key: keyof typeof textDraft) {
+    return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+      setTextDraft((d) => ({ ...d, [key]: e.target.value }))
+  }
+
+  async function handleSaveText() {
+    setSaving(true)
+    await updateForm(form.id, {
+      introTitle: textDraft.introTitle,
+      welcomeTitle: textDraft.welcomeTitle,
+      welcomeDescription: textDraft.welcomeDescription,
+      welcomeAlert: textDraft.welcomeAlert.trim() || null,
+      thankYouTitle: textDraft.thankYouTitle,
+      thankYouMessage: textDraft.thankYouMessage,
+    })
+    setSavedText({ ...textDraft })
+    setSaving(false)
+  }
+
   return (
     <div className="flex flex-col gap-6">
 
@@ -54,8 +89,8 @@ export function SettingsPanel({ form }: Props) {
               <label htmlFor="intro-title" className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Title</label>
               <input
                 id="intro-title"
-                defaultValue={form.introTitle}
-                onBlur={(e) => updateForm(form.id, { introTitle: e.target.value })}
+                value={textDraft.introTitle}
+                onChange={setField('introTitle')}
                 className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1 focus:border-white/60 transition-colors text-sm"
               />
             </div>
@@ -95,8 +130,8 @@ export function SettingsPanel({ form }: Props) {
               <label htmlFor="welcome-title" className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Title</label>
               <input
                 id="welcome-title"
-                defaultValue={form.welcomeTitle}
-                onBlur={(e) => updateForm(form.id, { welcomeTitle: e.target.value })}
+                value={textDraft.welcomeTitle}
+                onChange={setField('welcomeTitle')}
                 className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1 focus:border-white/60 transition-colors text-sm"
               />
             </div>
@@ -104,8 +139,8 @@ export function SettingsPanel({ form }: Props) {
               <label htmlFor="welcome-desc" className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Description</label>
               <textarea
                 id="welcome-desc"
-                defaultValue={form.welcomeDescription ?? ''}
-                onBlur={(e) => updateForm(form.id, { welcomeDescription: e.target.value })}
+                value={textDraft.welcomeDescription}
+                onChange={setField('welcomeDescription')}
                 rows={2}
                 placeholder="Optional..."
                 className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1 focus:border-white/60 transition-colors resize-none text-sm placeholder:text-white/20"
@@ -115,11 +150,8 @@ export function SettingsPanel({ form }: Props) {
               <label htmlFor="welcome-alert" className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Alert message</label>
               <textarea
                 id="welcome-alert"
-                defaultValue={form.welcomeAlert ?? ''}
-                onBlur={(e) => {
-                  const val = e.target.value.trim()
-                  updateForm(form.id, { welcomeAlert: val ? val : null })
-                }}
+                value={textDraft.welcomeAlert}
+                onChange={setField('welcomeAlert')}
                 rows={2}
                 placeholder="e.g. This form takes ~3 minutes. Answers are anonymous."
                 className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1 focus:border-white/60 transition-colors resize-none text-sm placeholder:text-white/20"
@@ -155,8 +187,8 @@ export function SettingsPanel({ form }: Props) {
               <label htmlFor="thankyou-title" className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Title</label>
               <input
                 id="thankyou-title"
-                defaultValue={form.thankYouTitle}
-                onBlur={(e) => updateForm(form.id, { thankYouTitle: e.target.value })}
+                value={textDraft.thankYouTitle}
+                onChange={setField('thankYouTitle')}
                 className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1 focus:border-white/60 transition-colors text-sm"
               />
             </div>
@@ -164,8 +196,8 @@ export function SettingsPanel({ form }: Props) {
               <label htmlFor="thankyou-desc" className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Description</label>
               <textarea
                 id="thankyou-desc"
-                defaultValue={form.thankYouMessage}
-                onBlur={(e) => updateForm(form.id, { thankYouMessage: e.target.value })}
+                value={textDraft.thankYouMessage}
+                onChange={setField('thankYouMessage')}
                 rows={2}
                 placeholder="Optional..."
                 className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1 focus:border-white/60 transition-colors resize-none text-sm placeholder:text-white/20"
@@ -226,6 +258,18 @@ export function SettingsPanel({ form }: Props) {
         )}
       </section>
 
+      {/* Sticky save footer */}
+      {isDirty && (
+        <div className="sticky bottom-0 bg-[#080808] border-t border-white/10 py-3 -mx-6 sm:-mx-8 px-6 sm:px-8 mt-4">
+          <button
+            onClick={handleSaveText}
+            disabled={saving}
+            className="px-4 py-2 bg-white text-black text-sm font-medium rounded-lg disabled:opacity-50 hover:bg-white/90 transition-colors"
+          >
+            {saving ? 'Saving…' : 'Save changes'}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
