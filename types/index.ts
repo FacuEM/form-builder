@@ -32,6 +32,9 @@ export interface Form {
   creatorId: string
   published: boolean
   closed: boolean
+  introEnabled: boolean
+  introTitle: string
+  introContent: Record<string, unknown> | null
   welcomeEnabled: boolean
   welcomeTitle: string
   welcomeDescription?: string | null

@@ -8,6 +8,7 @@ import { clearProgress, loadProgress, saveProgress, type Stage } from '@/lib/for
 import { ProgressBar } from './ProgressBar'
 import { QuestionSlide } from './QuestionSlide'
 import { ThankYouScreen } from './ThankYouScreen'
+import { IntroductionScreen } from './IntroductionScreen'
 
 interface Props {
   form: Form
@@ -21,12 +22,21 @@ interface RestoredState {
 }
 
 function readInitial(form: Form): RestoredState {
-  const defaultStage: Stage = form.welcomeEnabled ? 'welcome' : 'questions'
+  const defaultStage: Stage = form.introEnabled
+    ? 'introduction'
+    : form.welcomeEnabled
+      ? 'welcome'
+      : 'questions'
+
   if (typeof window === 'undefined') {
     return { index: 0, answers: {}, responseId: null, stage: defaultStage }
   }
   const saved = loadProgress(form.id)
   if (!saved || saved.stage === 'done') {
+    return { index: 0, answers: {}, responseId: null, stage: defaultStage }
+  }
+  // If saved stage is intro but intro is now disabled, fall back
+  if (saved.stage === 'introduction' && !form.introEnabled) {
     return { index: 0, answers: {}, responseId: null, stage: defaultStage }
   }
   // Drop answers for question IDs that no longer exist (form may have been edited)
@@ -72,6 +82,18 @@ export function FormPlayer({ form }: Props) {
   useEffect(() => {
     if (stage === 'done') clearProgress(form.id)
   }, [stage, form.id])
+
+  function handleNavigateBack() {
+    if (currentIndex > 0) {
+      navigate('back')
+    } else if (form.welcomeEnabled) {
+      setStage('welcome')
+    } else if (form.introEnabled) {
+      setStage('introduction')
+    }
+  }
+
+  const showBackOnQuestion = currentIndex > 0 || form.welcomeEnabled || form.introEnabled
 
   async function handleSubmit(overrideValue?: string) {
     if (!currentQuestion) return
@@ -130,6 +152,14 @@ export function FormPlayer({ form }: Props) {
         />
       )}
 
+      {stage === 'introduction' && (
+        <IntroductionScreen
+          title={form.introTitle}
+          content={form.introContent}
+          onContinue={() => setStage(form.welcomeEnabled ? 'welcome' : 'questions')}
+        />
+      )}
+
       {stage === 'welcome' && (
         <m.div
           initial={{ opacity: 0, y: 20 }}
@@ -154,12 +184,22 @@ export function FormPlayer({ form }: Props) {
             {form.welcomeDescription && (
               <p className="text-white/50 text-lg font-light mb-10 leading-relaxed">{form.welcomeDescription}</p>
             )}
-            <button
-              onClick={() => setStage('questions')}
-              className="mt-8 px-8 py-3.5 bg-white text-black font-medium rounded-lg hover:bg-white/90 transition-colors"
-            >
-              Start →
-            </button>
+            <div className="mt-8 flex items-center gap-3">
+              {form.introEnabled && (
+                <button
+                  onClick={() => setStage('introduction')}
+                  className="px-4 py-3.5 text-white/50 hover:text-white border border-white/15 hover:border-white/30 rounded-lg transition-colors text-sm font-medium"
+                >
+                  ← Back
+                </button>
+              )}
+              <button
+                onClick={() => setStage('questions')}
+                className="px-8 py-3.5 bg-white text-black font-medium rounded-lg hover:bg-white/90 transition-colors"
+              >
+                Start →
+              </button>
+            </div>
           </div>
         </m.div>
       )}
@@ -182,21 +222,14 @@ export function FormPlayer({ form }: Props) {
                 submitting={submitting}
                 formId={form.id}
                 responseId={responseId}
+                onBack={handleNavigateBack}
+                showBack={showBackOnQuestion}
               />
             )}
           </AnimatePresence>
 
           {error && (
             <p className="fixed bottom-8 left-1/2 -translate-x-1/2 text-red-400 text-sm">{error}</p>
-          )}
-
-          {currentIndex > 0 && (
-            <button
-              onClick={() => navigate('back')}
-              className="fixed bottom-8 right-8 text-white/30 hover:text-white/60 text-sm transition-colors"
-            >
-              ← Back
-            </button>
           )}
         </div>
       )}

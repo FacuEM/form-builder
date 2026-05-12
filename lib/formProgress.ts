@@ -1,7 +1,7 @@
 const VERSION = 1
 const KEY_PREFIX = 'form_progress_v1__'
 
-export type Stage = 'welcome' | 'questions' | 'done'
+export type Stage = 'introduction' | 'welcome' | 'questions' | 'done'
 
 export interface SavedProgress {
   v: number

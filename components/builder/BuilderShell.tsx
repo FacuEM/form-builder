@@ -176,6 +176,22 @@ export function BuilderShell({ form, hasResponses }: Props) {
 Schema:
 {
   "name": "string — form title (required)",
+  "introduction": {
+    "enabled": false,                  // set true to show this page before the welcome screen
+    "title": "string",
+    "content": {                       // TipTap JSONContent document
+      "type": "doc",
+      "content": [
+        // Supported node types:
+        // heading:     { "type": "heading", "attrs": { "level": 1 }, "content": [{ "type": "text", "text": "…" }] }
+        //              level 1 = H1, 2 = H2, 3 = H3
+        // paragraph:   { "type": "paragraph", "content": [{ "type": "text", "text": "…" }] }
+        // blockquote:  { "type": "blockquote", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "…" }] }] }
+        // bulletList:  { "type": "bulletList", "content": [{ "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "…" }] }] }] }
+        // orderedList: { "type": "orderedList", "attrs": { "start": 1 }, "content": [{ "type": "listItem", "content": [{ "type": "paragraph", "content": [{ "type": "text", "text": "…" }] }] }] }
+      ]
+    }
+  },
   "welcome": {
     "enabled": true,
     "title": "string",
@@ -189,7 +205,7 @@ Schema:
   },
   "questions": [
     {
-      "type": "TEXT | LONG_TEXT | CHOICE | DROPDOWN | MULTI_SELECT | MEDIA",
+      "type": "TEXT | LONG_TEXT | CHOICE | DROPDOWN | MULTI_SELECT | MEDIA | STATEMENT",
       "text": "string — question shown to respondent (required)",
       "description": "string — optional hint below question",
       "required": false,
@@ -198,6 +214,7 @@ Schema:
       "allowOther": false,                              // CHOICE or MULTI_SELECT only, optional
       "scored": false,                                  // CHOICE or DROPDOWN only, optional
       "mediaTypes": "image/*,video/*",                  // MEDIA only, optional
+      // STATEMENT: informational block (no answer), uses "text" field only
       "choices": [                                      // required for CHOICE, DROPDOWN, MULTI_SELECT
         { "label": "string", "weight": 0 }
       ]

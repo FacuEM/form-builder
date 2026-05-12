@@ -1,5 +1,13 @@
 import { z } from 'zod'
 
+const IntroductionSchema = z
+  .object({
+    enabled: z.boolean().default(false),
+    title: z.string().default('Introduction'),
+    content: z.unknown().optional().nullable(),
+  })
+  .optional()
+
 const ChoiceSchema = z.object({
   label: z.string().min(1).describe('Choice label text'),
   weight: z.number().int().default(0).describe('Scoring weight (0 = unscored)'),
@@ -7,7 +15,7 @@ const ChoiceSchema = z.object({
 
 const QuestionSchema = z.object({
   type: z
-    .enum(['TEXT', 'LONG_TEXT', 'CHOICE', 'DROPDOWN', 'MULTI_SELECT', 'MEDIA'])
+    .enum(['TEXT', 'LONG_TEXT', 'CHOICE', 'DROPDOWN', 'MULTI_SELECT', 'MEDIA', 'STATEMENT'])
     .describe('Question type'),
   text: z.string().min(1).describe('Question text shown to respondent'),
   description: z.string().optional().describe('Optional hint/description below the question'),
@@ -54,6 +62,7 @@ const ThankYouSchema = z
 
 export const FormSchema = z.object({
   name: z.string().min(1).describe('Form title'),
+  introduction: IntroductionSchema,
   welcome: WelcomeSchema,
   thankYou: ThankYouSchema,
   questions: z.array(QuestionSchema).describe('Questions in display order'),

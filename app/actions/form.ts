@@ -1,5 +1,6 @@
 'use server'
 
+import { Prisma } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/lib/db'
@@ -35,6 +36,9 @@ export async function updateForm(formId: string, data: {
   title?: string
   published?: boolean
   closed?: boolean
+  introEnabled?: boolean
+  introTitle?: string
+  introContent?: Record<string, unknown> | null
   welcomeEnabled?: boolean
   welcomeTitle?: string
   welcomeDescription?: string
@@ -44,7 +48,16 @@ export async function updateForm(formId: string, data: {
   thankYouMessage?: string
 }) {
   const user = await getUser()
-  await prisma.form.update({ where: { id: formId, creatorId: user.id }, data })
+  const { introContent, ...rest } = data
+  await prisma.form.update({
+    where: { id: formId, creatorId: user.id },
+    data: {
+      ...rest,
+      ...(introContent !== undefined
+        ? { introContent: introContent === null ? Prisma.DbNull : (introContent as Prisma.InputJsonValue) }
+        : {}),
+    },
+  })
 }
 
 // --- Question actions (no revalidatePath — BuilderShell manages local state) ---
@@ -146,6 +159,11 @@ export async function exportFormAsJson(formId: string): Promise<FormJson> {
 
   return {
     name: form.title,
+    introduction: {
+      enabled: form.introEnabled,
+      title: form.introTitle,
+      content: form.introContent ?? undefined,
+    },
     welcome: {
       enabled: form.welcomeEnabled,
       title: form.welcomeTitle,
@@ -187,6 +205,11 @@ export async function importFormFromJson(raw: unknown): Promise<string> {
     data: {
       title: json.name,
       creatorId: user.id,
+      introEnabled: json.introduction?.enabled ?? false,
+      introTitle: json.introduction?.title ?? 'Introduction',
+      introContent: json.introduction?.content
+        ? (json.introduction.content as Prisma.InputJsonValue)
+        : Prisma.DbNull,
       welcomeEnabled: json.welcome?.enabled ?? true,
       welcomeTitle: json.welcome?.title ?? 'Welcome',
       welcomeDescription: json.welcome?.description ?? null,

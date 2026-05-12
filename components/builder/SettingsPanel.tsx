@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { updateForm } from '@/app/actions/form'
 import type { Form } from '@/types'
+import { IntroductionEditor } from './IntroductionEditor'
 
 interface Props {
   form: Form
@@ -20,6 +21,7 @@ function Toggle({ enabled, onToggle }: { enabled: boolean; onToggle: () => void 
 }
 
 export function SettingsPanel({ form }: Props) {
+  const [introEnabled, setIntroEnabled] = useState(form.introEnabled)
   const [welcomeEnabled, setWelcomeEnabled] = useState(form.welcomeEnabled)
   const [thankYouEnabled, setThankYouEnabled] = useState(form.thankYouEnabled)
   const [published, setPublished] = useState(form.published)
@@ -28,6 +30,47 @@ export function SettingsPanel({ form }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
+
+      {/* Introduction page */}
+      <section className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-white text-sm font-medium">Introduction page</p>
+            <p className="text-white/40 text-xs mt-0.5">Shown before the welcome screen</p>
+          </div>
+          <Toggle
+            enabled={introEnabled}
+            onToggle={() => {
+              const next = !introEnabled
+              setIntroEnabled(next)
+              updateForm(form.id, { introEnabled: next })
+            }}
+          />
+        </div>
+
+        {introEnabled && (
+          <div className="flex flex-col gap-3 pl-3 border-l border-white/10">
+            <div>
+              <label htmlFor="intro-title" className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Title</label>
+              <input
+                id="intro-title"
+                defaultValue={form.introTitle}
+                onBlur={(e) => updateForm(form.id, { introTitle: e.target.value })}
+                className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1 focus:border-white/60 transition-colors text-sm"
+              />
+            </div>
+            <div>
+              <label className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Content</label>
+              <IntroductionEditor
+                content={form.introContent}
+                onBlur={(content) => updateForm(form.id, { introContent: content })}
+              />
+            </div>
+          </div>
+        )}
+      </section>
+
+      <div className="border-t border-white/10" />
 
       {/* Welcome page */}
       <section className="flex flex-col gap-4">

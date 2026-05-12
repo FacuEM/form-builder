@@ -20,6 +20,9 @@ model Form {
   thankYouEnabled      Boolean    @default(true)
   thankYouTitle        String     @default("Thank you!")
   thankYouMessage      String     @default("Your response has been recorded.")
+  introEnabled         Boolean    @default(false)
+  introTitle           String     @default("Introduction")
+  introContent         Json?
   questions            Question[]
   responses            Response[]
   createdAt            DateTime   @default(now())

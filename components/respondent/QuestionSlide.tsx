@@ -29,6 +29,8 @@ interface Props {
   submitting: boolean
   formId: string
   responseId: string | null
+  onBack?: () => void
+  showBack?: boolean
 }
 
 export function QuestionSlide({
@@ -42,6 +44,8 @@ export function QuestionSlide({
   submitting,
   formId,
   responseId,
+  onBack,
+  showBack,
 }: Props) {
   return (
     <m.div
@@ -63,7 +67,7 @@ export function QuestionSlide({
       )}
 
       {question.type === 'STATEMENT' && (
-        <NavigationHint onContinue={onSubmit} disabled={submitting} />
+        <NavigationHint onContinue={onSubmit} disabled={submitting} onBack={onBack} showBack={showBack} />
       )}
       {(question.type === 'TEXT' || question.type === 'LONG_TEXT') && (
         <TextQuestion question={question} value={value} onChange={onChange} onSubmit={onSubmit} disabled={submitting} />
@@ -92,6 +96,8 @@ export function QuestionSlide({
           onContinue={onSubmit}
           disabled={submitting}
           hasAnswer={value.trim().length > 0}
+          onBack={onBack}
+          showBack={showBack}
         />
       )}
     </m.div>

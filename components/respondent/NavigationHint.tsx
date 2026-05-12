@@ -16,9 +16,11 @@ interface Props {
    * Defaults to true so STATEMENT / WELCOME slides keep their existing affordance.
    */
   hasAnswer?: boolean
+  onBack?: () => void
+  showBack?: boolean
 }
 
-export function NavigationHint({ onContinue, disabled, hasAnswer = true }: Props) {
+export function NavigationHint({ onContinue, disabled, hasAnswer = true, onBack, showBack }: Props) {
   const [hintVisible, setHintVisible] = useState(false)
   const isTouchDevice = useTouchDevice()
 
@@ -31,26 +33,32 @@ export function NavigationHint({ onContinue, disabled, hasAnswer = true }: Props
   // Touch devices: keep tap target visible but disable until answered.
   if (isTouchDevice) {
     return (
-      <div className="mt-8" suppressHydrationWarning>
-        <AnimatePresence>
-          {hasAnswer && (
-            <ContinueButton key="btn" onClick={() => onContinue()} disabled={disabled} />
-          )}
-        </AnimatePresence>
-        {!hasAnswer && (
-          <button
-            disabled
-            className="px-6 py-3 bg-white/10 text-white/40 font-medium rounded-lg"
-          >
-            Continue →
-          </button>
+      <div className="mt-8 flex items-center gap-3" suppressHydrationWarning>
+        {showBack && (
+          <BackButton onClick={onBack!} />
         )}
+        <div>
+          <AnimatePresence>
+            {hasAnswer && (
+              <ContinueButton key="btn" onClick={() => onContinue()} disabled={disabled} />
+            )}
+          </AnimatePresence>
+          {!hasAnswer && (
+            <button
+              disabled
+              className="px-6 py-3 bg-white/10 text-white/40 font-medium rounded-lg"
+            >
+              Continue →
+            </button>
+          )}
+        </div>
       </div>
     )
   }
 
   return (
     <div className="mt-8 flex items-center gap-4 min-h-[48px]" suppressHydrationWarning>
+      {showBack && <BackButton onClick={onBack!} />}
       <AnimatePresence mode="wait">
         {hasAnswer ? (
           <ContinueButton key="btn" onClick={() => onContinue()} disabled={disabled} />
@@ -78,6 +86,28 @@ export function NavigationHint({ onContinue, disabled, hasAnswer = true }: Props
         </m.span>
       )}
     </div>
+  )
+}
+
+interface BackButtonProps {
+  onClick: () => void
+}
+
+function BackButton({ onClick }: BackButtonProps) {
+  return (
+    <m.button
+      type="button"
+      onClick={onClick}
+      initial={{ opacity: 0, x: -8 }}
+      animate={{ opacity: 1, x: 0 }}
+      transition={{ duration: 0.2, ease: [0.25, 0.1, 0.25, 1] }}
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.97 }}
+      className="inline-flex items-center gap-1.5 px-4 py-3 text-white/50 hover:text-white border border-white/15 hover:border-white/30 rounded-lg transition-colors text-sm font-medium min-h-[44px] min-w-[44px]"
+    >
+      <span aria-hidden>←</span>
+      <span>Back</span>
+    </m.button>
   )
 }
 
