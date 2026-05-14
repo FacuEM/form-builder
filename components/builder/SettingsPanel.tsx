@@ -42,6 +42,7 @@ export function SettingsPanel({ form }: Props) {
   const [introChanged, setIntroChanged] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+  const [saveError, setSaveError] = useState<string | null>(null)
 
   const textDirty = (Object.keys(textDraft) as (keyof typeof textDraft)[]).some(
     (k) => textDraft[k] !== savedText[k]
@@ -55,20 +56,31 @@ export function SettingsPanel({ form }: Props) {
 
   async function handleSaveText() {
     setSaving(true)
-    await updateForm(form.id, {
-      introTitle: textDraft.introTitle,
-      introContent: introDraft,
-      welcomeTitle: textDraft.welcomeTitle,
-      welcomeDescription: textDraft.welcomeDescription,
-      welcomeAlert: textDraft.welcomeAlert.trim() || null,
-      thankYouTitle: textDraft.thankYouTitle,
-      thankYouMessage: textDraft.thankYouMessage,
-    })
-    setSavedText({ ...textDraft })
-    setIntroChanged(false)
-    setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+    setSaveError(null)
+    try {
+      // Sanitize introDraft to a plain object — Prisma JsonValue may carry internal
+      // state that confuses Next.js 16 server action serialization.
+      const safeIntroContent = introDraft
+        ? (JSON.parse(JSON.stringify(introDraft)) as Record<string, unknown>)
+        : null
+      await updateForm(form.id, {
+        introTitle: textDraft.introTitle,
+        introContent: safeIntroContent,
+        welcomeTitle: textDraft.welcomeTitle,
+        welcomeDescription: textDraft.welcomeDescription,
+        welcomeAlert: textDraft.welcomeAlert.trim() || null,
+        thankYouTitle: textDraft.thankYouTitle,
+        thankYouMessage: textDraft.thankYouMessage,
+      })
+      setSavedText({ ...textDraft })
+      setIntroChanged(false)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2000)
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Save failed. Please try again.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -267,9 +279,11 @@ export function SettingsPanel({ form }: Props) {
       </section>
 
       {/* Sticky save footer */}
-      {(isDirty || saved) && (
+      {(isDirty || saved || saveError) && (
         <div className="sticky bottom-0 bg-[#080808] border-t border-white/10 py-3 -mx-6 sm:-mx-8 px-6 sm:px-8 mt-4 flex items-center gap-3">
-          {saved && !isDirty ? (
+          {saveError ? (
+            <span className="text-red-400 text-sm">{saveError}</span>
+          ) : saved && !isDirty ? (
             <span className="text-white/60 text-sm">✓ Saved</span>
           ) : (
             <button

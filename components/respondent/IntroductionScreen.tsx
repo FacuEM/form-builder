@@ -21,7 +21,7 @@ export function IntroductionScreen({ title, content, onContinue }: Props) {
     editable: false,
     editorProps: {
       attributes: {
-        class: 'outline-none prose prose-sm sm:prose prose-invert max-w-none',
+        class: 'outline-none prose prose-sm sm:prose max-w-none [--tw-prose-body:theme(colors.white/90)] [--tw-prose-headings:theme(colors.white)] [--tw-prose-lead:theme(colors.white/80)] [--tw-prose-links:theme(colors.white)] [--tw-prose-bold:theme(colors.white)] [--tw-prose-counters:theme(colors.white/70)] [--tw-prose-bullets:theme(colors.white/50)] [--tw-prose-hr:theme(colors.white/20)] [--tw-prose-quotes:theme(colors.white)] [--tw-prose-quote-borders:theme(colors.white/30)] [--tw-prose-captions:theme(colors.white/60)] [--tw-prose-code:theme(colors.white)] [--tw-prose-pre-code:theme(colors.white/90)] [--tw-prose-pre-bg:theme(colors.white/5)] [--tw-prose-th-borders:theme(colors.white/20)] [--tw-prose-td-borders:theme(colors.white/10)]',
       },
     },
   })
