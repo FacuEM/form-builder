@@ -87,23 +87,20 @@ export function ChoiceQuestion({ question, value, onChange, onSubmit, disabled }
 
       {question.allowOther && (
         <div
+          role={!isOtherSelected ? 'button' : undefined}
+          tabIndex={!isOtherSelected ? 0 : undefined}
+          onClick={!isOtherSelected ? selectOther : undefined}
+          onKeyDown={!isOtherSelected ? (e) => { if (e.key === 'Enter' || e.key === ' ') selectOther() } : undefined}
           className={`flex items-center gap-3 px-4 py-3 rounded-lg border transition-all duration-150 ${
             isOtherSelected
               ? 'border-white bg-white/10'
-              : 'border-white/20 text-white/70 hover:border-white/50'
+              : 'border-white/20 text-white/70 hover:border-white/50 cursor-pointer'
           }`}
         >
-          <button
-            disabled={disabled}
-            onClick={selectOther}
-            className="flex items-center gap-3 flex-1 text-left"
-          >
-            <span className="text-xs font-mono opacity-60 w-5 shrink-0">
-              {['A', 'B', 'C', 'D'][question.choices.length] ?? String(question.choices.length + 1)}
-            </span>
-            {!isOtherSelected && <span className="text-white/70">Other…</span>}
-          </button>
-          {isOtherSelected && (
+          <span className="text-xs font-mono opacity-60 w-5 shrink-0">
+            {['A', 'B', 'C', 'D'][question.choices.length] ?? String(question.choices.length + 1)}
+          </span>
+          {isOtherSelected ? (
             <input
               ref={otherInputRef}
               type="text"
@@ -111,8 +108,10 @@ export function ChoiceQuestion({ question, value, onChange, onSubmit, disabled }
               onChange={(e) => onChange(OTHER_PREFIX + e.target.value)}
               placeholder="Please specify…"
               disabled={disabled}
-              className="flex-1 bg-transparent text-white outline-none placeholder:text-white/30 text-sm"
+              className="flex-1 bg-transparent text-white outline-none placeholder:text-white/30"
             />
+          ) : (
+            <span>Other…</span>
           )}
         </div>
       )}

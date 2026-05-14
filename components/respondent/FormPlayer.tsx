@@ -182,7 +182,7 @@ export function FormPlayer({ form }: Props) {
             )}
             <h1 className="text-white text-4xl font-light mb-4 leading-tight">{form.welcomeTitle}</h1>
             {form.welcomeDescription && (
-              <p className="text-white/50 text-lg font-light mb-10 leading-relaxed">{form.welcomeDescription}</p>
+              <p className="text-white/50 text-lg font-light mb-10 leading-relaxed whitespace-pre-line">{form.welcomeDescription}</p>
             )}
             <div className="mt-8 flex items-center gap-3">
               {form.introEnabled && (

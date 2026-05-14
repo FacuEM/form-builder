@@ -1,8 +1,12 @@
 'use client'
 
 import { m } from 'framer-motion'
-import { useEffect, useRef, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import type { Question } from '@/types'
+
+export interface TextQuestionHandle {
+  submit: () => void
+}
 
 interface Props {
   question: Question
@@ -60,11 +64,16 @@ function defaultPlaceholder(q: Question): string {
   }
 }
 
-export function TextQuestion({ question, value, onChange, onSubmit, disabled }: Props) {
+export const TextQuestion = forwardRef<TextQuestionHandle, Props>(function TextQuestion(
+  { question, value, onChange, onSubmit, disabled }: Props,
+  ref,
+) {
   const [shake, setShake] = useState(false)
   const [validationError, setValidationError] = useState<string | null>(null)
   const inputRef    = useRef<HTMLInputElement | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
+
+  useImperativeHandle(ref, () => ({ submit: handleSubmit }))
 
   useEffect(() => {
     if (question.type === 'LONG_TEXT') {
@@ -137,4 +146,4 @@ export function TextQuestion({ question, value, onChange, onSubmit, disabled }: 
       )}
     </m.div>
   )
-}
+})

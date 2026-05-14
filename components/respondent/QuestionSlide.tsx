@@ -1,9 +1,10 @@
 'use client'
 
 import { m } from 'framer-motion'
+import { useRef } from 'react'
 import type { Direction } from '@/hooks/useRespondentState'
 import type { Question } from '@/types'
-import { TextQuestion } from './questions/TextQuestion'
+import { TextQuestion, type TextQuestionHandle } from './questions/TextQuestion'
 import { ChoiceQuestion } from './questions/ChoiceQuestion'
 import { DropdownQuestion } from './questions/DropdownQuestion'
 import { MultiSelectQuestion } from './questions/MultiSelectQuestion'
@@ -47,6 +48,10 @@ export function QuestionSlide({
   onBack,
   showBack,
 }: Props) {
+  const textRef = useRef<TextQuestionHandle>(null)
+  const isTextType = question.type === 'TEXT' || question.type === 'LONG_TEXT'
+  const handleContinue = isTextType ? () => textRef.current?.submit() : onSubmit
+
   return (
     <m.div
       key={question.id}
@@ -70,7 +75,7 @@ export function QuestionSlide({
         <NavigationHint onContinue={onSubmit} disabled={submitting} onBack={onBack} showBack={showBack} />
       )}
       {(question.type === 'TEXT' || question.type === 'LONG_TEXT') && (
-        <TextQuestion question={question} value={value} onChange={onChange} onSubmit={onSubmit} disabled={submitting} />
+        <TextQuestion ref={textRef} question={question} value={value} onChange={onChange} onSubmit={onSubmit} disabled={submitting} />
       )}
       {question.type === 'CHOICE' && (
         <ChoiceQuestion question={question} value={value} onChange={onChange} onSubmit={onSubmit} disabled={submitting} />
@@ -93,7 +98,7 @@ export function QuestionSlide({
       )}
       {question.type !== 'STATEMENT' && (
         <NavigationHint
-          onContinue={onSubmit}
+          onContinue={handleContinue}
           disabled={submitting}
           hasAnswer={value.trim().length > 0}
           onBack={onBack}

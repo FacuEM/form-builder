@@ -28,7 +28,7 @@ export function ThankYouScreen({ title, description }: Props) {
       >
         <h1 className="text-white text-4xl font-light mb-4 leading-tight">{title}</h1>
         {description && (
-          <p className="text-white/50 text-lg font-light leading-relaxed">{description}</p>
+          <p className="text-white/50 text-lg font-light leading-relaxed whitespace-pre-line">{description}</p>
         )}
       </m.div>
     </div>
