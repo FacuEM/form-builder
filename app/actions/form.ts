@@ -58,6 +58,7 @@ export async function updateForm(formId: string, data: {
         : {}),
     },
   })
+  revalidatePath(`/dashboard/forms/${formId}/edit`)
 }
 
 // --- Question actions (no revalidatePath — BuilderShell manages local state) ---
