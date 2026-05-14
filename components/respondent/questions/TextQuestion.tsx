@@ -3,6 +3,7 @@
 import { m } from 'framer-motion'
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import type { Question } from '@/types'
+import { PhoneQuestion } from './PhoneQuestion'
 
 export interface TextQuestionHandle {
   submit: () => void
@@ -22,9 +23,9 @@ function validateEmail(v: string) {
 }
 
 function validatePhone(v: string) {
-  // Allow digits, spaces, +, -, (, )  — at least 6 digits
+  // Stored as "+dialcode localnumber" — require 7–15 total digits (ITU E.164)
   const digits = v.replace(/\D/g, '')
-  return digits.length >= 6 && /^[+\d\s\-().]+$/.test(v.trim())
+  return digits.length >= 7 && digits.length <= 15
 }
 
 function validateUrl(v: string) {
@@ -128,11 +129,19 @@ export const TextQuestion = forwardRef<TextQuestionHandle, Props>(function TextQ
           rows={4}
           className={`${sharedClasses} resize-none`}
         />
+      ) : question.textInputType === 'phone' ? (
+        <PhoneQuestion
+          ref={inputRef}
+          value={value}
+          onChange={(v) => { onChange(v); setValidationError(null) }}
+          onKeyDown={handleKeyDown}
+          disabled={disabled}
+        />
       ) : (
         <input
           ref={inputRef}
           type={htmlInputType(question)}
-          inputMode={question.textInputType === 'phone' ? 'tel' : question.textInputType === 'url' ? 'url' : question.textInputType === 'email' ? 'email' : 'text'}
+          inputMode={question.textInputType === 'url' ? 'url' : question.textInputType === 'email' ? 'email' : 'text'}
           value={value}
           onChange={(e) => { onChange(e.target.value); setValidationError(null) }}
           onKeyDown={handleKeyDown}
