@@ -21,7 +21,7 @@ const QuestionSchema = z.object({
   description: z.string().optional().describe('Optional hint/description below the question'),
   required: z.boolean().default(false).describe('Whether an answer is required to advance'),
   textInputType: z
-    .enum(['text', 'email', 'phone', 'url'])
+    .enum(['text', 'email', 'phone', 'url', 'country'])
     .optional()
     .describe('Input format for TEXT questions'),
   placeholder: z.string().optional().describe('Placeholder for TEXT / LONG_TEXT questions'),

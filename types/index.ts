@@ -1,6 +1,6 @@
 export type QuestionType = 'TEXT' | 'LONG_TEXT' | 'CHOICE' | 'DROPDOWN' | 'MULTI_SELECT' | 'STATEMENT' | 'WELCOME' | 'MEDIA'
 
-export type TextInputType = 'text' | 'email' | 'phone' | 'url'
+export type TextInputType = 'text' | 'email' | 'phone' | 'url' | 'country'
 
 export interface Choice {
   id: string

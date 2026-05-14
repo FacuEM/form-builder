@@ -81,7 +81,7 @@ export async function updateQuestion(
     description?: string
     required?: boolean
     scored?: boolean
-    textInputType?: 'text' | 'email' | 'phone' | 'url' | null
+    textInputType?: 'text' | 'email' | 'phone' | 'url' | 'country' | null
     placeholder?: string | null
     allowOther?: boolean
     mediaTypes?: string | null

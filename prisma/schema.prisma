@@ -98,4 +98,5 @@ enum TextInputType {
   email
   phone
   url
+  country
 }

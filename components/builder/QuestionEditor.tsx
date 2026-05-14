@@ -27,10 +27,11 @@ const MEDIA_TYPE_OPTIONS = [
 ]
 
 const TEXT_SUBTYPES: { value: TextInputType; label: string; hint: string }[] = [
-  { value: 'text',  label: 'Plain text', hint: 'Any text' },
-  { value: 'email', label: 'Email',      hint: 'name@example.com' },
-  { value: 'phone', label: 'Phone',      hint: '+1 (555) 000-0000' },
-  { value: 'url',   label: 'Link / URL', hint: 'https://…' },
+  { value: 'text',    label: 'Plain text', hint: 'Any text' },
+  { value: 'email',   label: 'Email',      hint: 'name@example.com' },
+  { value: 'phone',   label: 'Phone',      hint: '+1 (555) 000-0000' },
+  { value: 'url',     label: 'Link / URL', hint: 'https://…' },
+  { value: 'country', label: 'Country',    hint: 'Country picker' },
 ]
 
 interface Props {

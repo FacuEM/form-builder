@@ -4,6 +4,7 @@ import { m } from 'framer-motion'
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import type { Question } from '@/types'
 import { PhoneQuestion } from './PhoneQuestion'
+import { CountryQuestion } from './CountryQuestion'
 
 export interface TextQuestionHandle {
   submit: () => void
@@ -131,6 +132,14 @@ export const TextQuestion = forwardRef<TextQuestionHandle, Props>(function TextQ
         />
       ) : question.textInputType === 'phone' ? (
         <PhoneQuestion
+          ref={inputRef}
+          value={value}
+          onChange={(v) => { onChange(v); setValidationError(null) }}
+          onKeyDown={handleKeyDown}
+          disabled={disabled}
+        />
+      ) : question.textInputType === 'country' ? (
+        <CountryQuestion
           ref={inputRef}
           value={value}
           onChange={(v) => { onChange(v); setValidationError(null) }}

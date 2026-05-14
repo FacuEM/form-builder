@@ -56,7 +56,7 @@ export function BuilderShell({ form, hasResponses }: Props) {
     refresh()
   }
 
-  async function handleUpdateQuestion(questionId: string, data: { text?: string; description?: string; required?: boolean; scored?: boolean; textInputType?: 'text' | 'email' | 'phone' | 'url' | null; placeholder?: string | null; allowOther?: boolean; mediaTypes?: string | null }) {
+  async function handleUpdateQuestion(questionId: string, data: { text?: string; description?: string; required?: boolean; scored?: boolean; textInputType?: 'text' | 'email' | 'phone' | 'url' | 'country' | null; placeholder?: string | null; allowOther?: boolean; mediaTypes?: string | null }) {
     setQuestions((prev) => prev.map((q) => (q.id === questionId ? { ...q, ...data } : q)))
     await updateQuestion(questionId, form.id, data)
     refresh()
