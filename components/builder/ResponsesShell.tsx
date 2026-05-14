@@ -1,9 +1,10 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { ResponseDetail } from './ResponseDetail'
 import { hasAnyScoredQuestion, totalScore } from '@/lib/scoring'
+import { deleteResponse, deleteAllResponses } from '@/app/actions/form'
 import type { Question } from '@/types'
 
 function formatCellValue(value: string): string {
@@ -48,12 +49,14 @@ type SortMode = 'date' | 'score'
 export function ResponsesShell({ form, questions, responses }: Props) {
   const [selected, setSelected] = useState<Response | null>(null)
   const [sortMode, setSortMode] = useState<SortMode>('date')
+  const [localResponses, setLocalResponses] = useState(responses)
+  const [isPending, startTransition] = useTransition()
 
   const showScores = useMemo(() => hasAnyScoredQuestion(questions), [questions])
 
   const scored = useMemo(
-    () => responses.map((r) => ({ r, score: totalScore(questions, r.answers) })),
-    [questions, responses],
+    () => localResponses.map((r) => ({ r, score: totalScore(questions, r.answers) })),
+    [questions, localResponses],
   )
 
   const sorted = useMemo(() => {
@@ -64,6 +67,25 @@ export function ResponsesShell({ form, questions, responses }: Props) {
       (a, b) => new Date(b.r.createdAt).getTime() - new Date(a.r.createdAt).getTime(),
     )
   }, [scored, sortMode, showScores])
+
+  function handleDeleteResponse(responseId: string, e: React.MouseEvent) {
+    e.stopPropagation()
+    if (!confirm('Delete this response?')) return
+    startTransition(async () => {
+      await deleteResponse(responseId, form.id)
+      setLocalResponses((prev) => prev.filter((r) => r.id !== responseId))
+      if (selected?.id === responseId) setSelected(null)
+    })
+  }
+
+  function handleDeleteAll() {
+    if (!confirm(`Delete all ${localResponses.length} response${localResponses.length !== 1 ? 's' : ''}? This cannot be undone.`)) return
+    startTransition(async () => {
+      await deleteAllResponses(form.id)
+      setLocalResponses([])
+      setSelected(null)
+    })
+  }
 
   return (
     <div className="min-h-screen bg-[#080808]">
@@ -86,15 +108,22 @@ export function ResponsesShell({ form, questions, responses }: Props) {
       </header>
 
       <div className="px-6 py-8 max-w-5xl mx-auto">
-        {responses.length === 0 ? (
+        {localResponses.length === 0 ? (
           <p className="text-white/30 text-sm">No responses yet.</p>
         ) : (
           <>
             <div className="flex items-center justify-between mb-4">
               <p className="text-white/40 text-xs">
-                {responses.length} response{responses.length !== 1 ? 's' : ''}
+                {localResponses.length} response{localResponses.length !== 1 ? 's' : ''}
               </p>
               <div className="flex items-center gap-3">
+              <button
+                onClick={handleDeleteAll}
+                disabled={isPending}
+                className="text-red-400/60 hover:text-red-400 text-xs px-3 py-1.5 border border-red-400/10 rounded-lg hover:border-red-400/30 transition-colors disabled:opacity-40"
+              >
+                Clear all
+              </button>
               <a
                 href={`/api/forms/${form.id}/responses/export`}
                 className="text-white/50 hover:text-white text-xs px-3 py-1.5 border border-white/10 rounded-lg hover:border-white/30 transition-colors"
@@ -145,6 +174,7 @@ export function ResponsesShell({ form, questions, responses }: Props) {
                         <span className="truncate block">{q.text}</span>
                       </th>
                     ))}
+                    <th className="py-3 w-8" />
                   </tr>
                 </thead>
                 <tbody>
@@ -180,6 +210,16 @@ export function ResponsesShell({ form, questions, responses }: Props) {
                             </span>
                           </td>
                         ))}
+                        <td className="py-3 text-right">
+                          <button
+                            onClick={(e) => handleDeleteResponse(r.id, e)}
+                            disabled={isPending}
+                            className="text-white/20 hover:text-red-400 transition-colors text-xs px-1 disabled:opacity-40"
+                            aria-label="Delete response"
+                          >
+                            ✕
+                          </button>
+                        </td>
                       </tr>
                     )
                   })}
@@ -199,6 +239,14 @@ export function ResponsesShell({ form, questions, responses }: Props) {
         response={selected}
         questions={questions}
         onClose={() => setSelected(null)}
+        onDelete={(id) => {
+          if (!confirm('Delete this response?')) return
+          startTransition(async () => {
+            await deleteResponse(id, form.id)
+            setLocalResponses((prev) => prev.filter((r) => r.id !== id))
+            setSelected(null)
+          })
+        }}
       />
     </div>
   )

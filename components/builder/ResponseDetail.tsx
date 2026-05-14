@@ -36,9 +36,10 @@ interface Props {
   response: Response | null
   questions: Question[]
   onClose: () => void
+  onDelete: (id: string) => void
 }
 
-export function ResponseDetail({ response, questions, onClose }: Props) {
+export function ResponseDetail({ response, questions, onClose, onDelete }: Props) {
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') onClose()
@@ -78,12 +79,20 @@ export function ResponseDetail({ response, questions, onClose }: Props) {
               )}
             </p>
           </div>
-          <button
-            onClick={onClose}
-            className="text-white/40 hover:text-white transition-colors text-lg"
-          >
-            ✕
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => onDelete(response.id)}
+              className="text-red-400/50 hover:text-red-400 transition-colors text-xs"
+            >
+              Delete
+            </button>
+            <button
+              onClick={onClose}
+              className="text-white/40 hover:text-white transition-colors text-lg"
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         {score != null && (
