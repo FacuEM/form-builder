@@ -21,7 +21,8 @@ export function IntroductionScreen({ title, content, onContinue }: Props) {
     editable: false,
     editorProps: {
       attributes: {
-        class: 'outline-none prose prose-sm sm:prose max-w-none [--tw-prose-body:theme(colors.white/90)] [--tw-prose-headings:theme(colors.white)] [--tw-prose-lead:theme(colors.white/80)] [--tw-prose-links:theme(colors.white)] [--tw-prose-bold:theme(colors.white)] [--tw-prose-counters:theme(colors.white/70)] [--tw-prose-bullets:theme(colors.white/50)] [--tw-prose-hr:theme(colors.white/20)] [--tw-prose-quotes:theme(colors.white)] [--tw-prose-quote-borders:theme(colors.white/30)] [--tw-prose-captions:theme(colors.white/60)] [--tw-prose-code:theme(colors.white)] [--tw-prose-pre-code:theme(colors.white/90)] [--tw-prose-pre-bg:theme(colors.white/5)] [--tw-prose-th-borders:theme(colors.white/20)] [--tw-prose-td-borders:theme(colors.white/10)]',
+        class: 'outline-none prose prose-sm sm:prose prose-invert max-w-none',
+        style: '--tw-prose-body: rgba(255,255,255,0.85); --tw-prose-headings: #ffffff; --tw-prose-lead: rgba(255,255,255,0.7); --tw-prose-bold: #ffffff; --tw-prose-counters: rgba(255,255,255,0.7); --tw-prose-bullets: rgba(255,255,255,0.5); --tw-prose-quotes: rgba(255,255,255,0.85); --tw-prose-quote-borders: rgba(255,255,255,0.25); --tw-prose-links: #ffffff;',
       },
     },
   })
