@@ -16,10 +16,12 @@ model Form {
   welcomeEnabled       Boolean    @default(true)
   welcomeTitle         String     @default("Welcome")
   welcomeDescription   String?
+  welcomeContent       Json?
   welcomeAlert         String?
   thankYouEnabled      Boolean    @default(true)
   thankYouTitle        String     @default("Thank you!")
   thankYouMessage      String     @default("Your response has been recorded.")
+  thankYouContent      Json?
   introEnabled         Boolean    @default(false)
   introTitle           String     @default("Introduction")
   introContent         Json?

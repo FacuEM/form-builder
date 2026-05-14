@@ -42,20 +42,28 @@ export async function updateForm(formId: string, data: {
   welcomeEnabled?: boolean
   welcomeTitle?: string
   welcomeDescription?: string
+  welcomeContent?: Record<string, unknown> | null
   welcomeAlert?: string | null
   thankYouEnabled?: boolean
   thankYouTitle?: string
   thankYouMessage?: string
+  thankYouContent?: Record<string, unknown> | null
 }) {
   const user = await getUser()
-  const { introContent, ...rest } = data
+  const { introContent, welcomeContent, thankYouContent, ...rest } = data
+
+  function toJsonValue(v: Record<string, unknown> | null | undefined) {
+    if (v === undefined) return undefined
+    return v === null ? Prisma.DbNull : (v as Prisma.InputJsonValue)
+  }
+
   await prisma.form.update({
     where: { id: formId, creatorId: user.id },
     data: {
       ...rest,
-      ...(introContent !== undefined
-        ? { introContent: introContent === null ? Prisma.DbNull : (introContent as Prisma.InputJsonValue) }
-        : {}),
+      ...(introContent !== undefined ? { introContent: toJsonValue(introContent) } : {}),
+      ...(welcomeContent !== undefined ? { welcomeContent: toJsonValue(welcomeContent) } : {}),
+      ...(thankYouContent !== undefined ? { thankYouContent: toJsonValue(thankYouContent) } : {}),
     },
   })
   revalidatePath(`/dashboard/forms/${formId}/edit`)
@@ -141,6 +149,22 @@ export async function deleteChoice(choiceId: string, formId: string) {
   const user = await getUser()
   await prisma.form.findFirstOrThrow({ where: { id: formId, creatorId: user.id } })
   await prisma.choice.delete({ where: { id: choiceId } })
+}
+
+// --- Response actions ---
+
+export async function deleteResponse(responseId: string, formId: string) {
+  const user = await getUser()
+  await prisma.form.findFirstOrThrow({ where: { id: formId, creatorId: user.id } })
+  await prisma.response.delete({ where: { id: responseId } })
+  revalidatePath(`/dashboard/forms/${formId}/responses`)
+}
+
+export async function deleteAllResponses(formId: string) {
+  const user = await getUser()
+  await prisma.form.findFirstOrThrow({ where: { id: formId, creatorId: user.id } })
+  await prisma.response.deleteMany({ where: { formId } })
+  revalidatePath(`/dashboard/forms/${formId}/responses`)
 }
 
 // --- Import / export ---

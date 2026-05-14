@@ -3,13 +3,15 @@
 import { useEffect } from 'react'
 import { m } from 'framer-motion'
 import confetti from 'canvas-confetti'
+import { RichTextContent } from './RichTextContent'
 
 interface Props {
   title: string
+  content?: Record<string, unknown> | null
   description?: string
 }
 
-export function ThankYouScreen({ title, description }: Props) {
+export function ThankYouScreen({ title, content, description }: Props) {
   useEffect(() => {
     confetti({
       particleCount: 120,
@@ -27,9 +29,11 @@ export function ThankYouScreen({ title, description }: Props) {
         className="w-full max-w-xl"
       >
         <h1 className="text-white text-4xl font-light mb-4 leading-tight">{title}</h1>
-        {description && (
+        {content ? (
+          <RichTextContent content={content} />
+        ) : description ? (
           <p className="text-white/50 text-lg font-light leading-relaxed whitespace-pre-line">{description}</p>
-        )}
+        ) : null}
       </m.div>
     </div>
   )

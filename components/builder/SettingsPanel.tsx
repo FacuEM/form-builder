@@ -31,15 +31,17 @@ export function SettingsPanel({ form }: Props) {
   const initialText = {
     introTitle: form.introTitle ?? '',
     welcomeTitle: form.welcomeTitle ?? '',
-    welcomeDescription: form.welcomeDescription ?? '',
     welcomeAlert: form.welcomeAlert ?? '',
     thankYouTitle: form.thankYouTitle ?? '',
-    thankYouMessage: form.thankYouMessage ?? '',
   }
   const [textDraft, setTextDraft] = useState(initialText)
   const [savedText, setSavedText] = useState(initialText)
   const [introDraft, setIntroDraft] = useState<Record<string, unknown> | null>(form.introContent)
   const [introChanged, setIntroChanged] = useState(false)
+  const [welcomeContentDraft, setWelcomeContentDraft] = useState<Record<string, unknown> | null>(form.welcomeContent ?? null)
+  const [welcomeContentChanged, setWelcomeContentChanged] = useState(false)
+  const [thankYouContentDraft, setThankYouContentDraft] = useState<Record<string, unknown> | null>(form.thankYouContent ?? null)
+  const [thankYouContentChanged, setThankYouContentChanged] = useState(false)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
@@ -47,7 +49,7 @@ export function SettingsPanel({ form }: Props) {
   const textDirty = (Object.keys(textDraft) as (keyof typeof textDraft)[]).some(
     (k) => textDraft[k] !== savedText[k]
   )
-  const isDirty = textDirty || introChanged
+  const isDirty = textDirty || introChanged || welcomeContentChanged || thankYouContentChanged
 
   function setField(key: keyof typeof textDraft) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
@@ -63,17 +65,25 @@ export function SettingsPanel({ form }: Props) {
       const safeIntroContent = introDraft
         ? (JSON.parse(JSON.stringify(introDraft)) as Record<string, unknown>)
         : null
+      const safeWelcomeContent = welcomeContentDraft
+        ? (JSON.parse(JSON.stringify(welcomeContentDraft)) as Record<string, unknown>)
+        : null
+      const safeThankYouContent = thankYouContentDraft
+        ? (JSON.parse(JSON.stringify(thankYouContentDraft)) as Record<string, unknown>)
+        : null
       await updateForm(form.id, {
         introTitle: textDraft.introTitle,
         introContent: safeIntroContent,
         welcomeTitle: textDraft.welcomeTitle,
-        welcomeDescription: textDraft.welcomeDescription,
+        welcomeContent: safeWelcomeContent,
         welcomeAlert: textDraft.welcomeAlert.trim() || null,
         thankYouTitle: textDraft.thankYouTitle,
-        thankYouMessage: textDraft.thankYouMessage,
+        thankYouContent: safeThankYouContent,
       })
       setSavedText({ ...textDraft })
       setIntroChanged(false)
+      setWelcomeContentChanged(false)
+      setThankYouContentChanged(false)
       setSaved(true)
       setTimeout(() => setSaved(false), 2000)
     } catch (err) {
@@ -156,14 +166,10 @@ export function SettingsPanel({ form }: Props) {
               />
             </div>
             <div>
-              <label htmlFor="welcome-desc" className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Description</label>
-              <textarea
-                id="welcome-desc"
-                value={textDraft.welcomeDescription}
-                onChange={setField('welcomeDescription')}
-                rows={2}
-                placeholder="Optional..."
-                className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1 focus:border-white/60 transition-colors resize-none text-sm placeholder:text-white/20"
+              <label className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Description</label>
+              <IntroductionEditor
+                content={welcomeContentDraft}
+                onChange={(content) => { setWelcomeContentDraft(content); setWelcomeContentChanged(true) }}
               />
             </div>
             <div>
@@ -213,14 +219,10 @@ export function SettingsPanel({ form }: Props) {
               />
             </div>
             <div>
-              <label htmlFor="thankyou-desc" className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Description</label>
-              <textarea
-                id="thankyou-desc"
-                value={textDraft.thankYouMessage}
-                onChange={setField('thankYouMessage')}
-                rows={2}
-                placeholder="Optional..."
-                className="w-full bg-transparent border-b border-white/20 text-white outline-none py-1 focus:border-white/60 transition-colors resize-none text-sm placeholder:text-white/20"
+              <label className="text-white/40 text-xs uppercase tracking-wider mb-1.5 block">Description</label>
+              <IntroductionEditor
+                content={thankYouContentDraft}
+                onChange={(content) => { setThankYouContentDraft(content); setThankYouContentChanged(true) }}
               />
             </div>
           </div>

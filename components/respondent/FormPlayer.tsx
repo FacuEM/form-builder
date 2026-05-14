@@ -9,6 +9,7 @@ import { ProgressBar } from './ProgressBar'
 import { QuestionSlide } from './QuestionSlide'
 import { ThankYouScreen } from './ThankYouScreen'
 import { IntroductionScreen } from './IntroductionScreen'
+import { RichTextContent } from './RichTextContent'
 
 interface Props {
   form: Form
@@ -155,6 +156,7 @@ export function FormPlayer({ form }: Props) {
       {stage === 'done' && (
         <ThankYouScreen
           title={form.thankYouTitle}
+          content={form.thankYouContent}
           description={form.thankYouMessage || undefined}
         />
       )}
@@ -188,9 +190,13 @@ export function FormPlayer({ form }: Props) {
               </m.div>
             )}
             <h1 className="text-white text-4xl font-light mb-4 leading-tight">{form.welcomeTitle}</h1>
-            {form.welcomeDescription && (
+            {form.welcomeContent ? (
+              <div className="mb-10">
+                <RichTextContent content={form.welcomeContent} />
+              </div>
+            ) : form.welcomeDescription ? (
               <p className="text-white/50 text-lg font-light mb-10 leading-relaxed whitespace-pre-line">{form.welcomeDescription}</p>
-            )}
+            ) : null}
             <div className="mt-8 flex items-center gap-3">
               {form.introEnabled && (
                 <button

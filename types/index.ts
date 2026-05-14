@@ -38,9 +38,11 @@ export interface Form {
   welcomeEnabled: boolean
   welcomeTitle: string
   welcomeDescription?: string | null
+  welcomeContent?: Record<string, unknown> | null
   welcomeAlert?: string | null
   thankYouEnabled: boolean
   thankYouTitle: string
   thankYouMessage: string
+  thankYouContent?: Record<string, unknown> | null
   questions: Question[]
 }
