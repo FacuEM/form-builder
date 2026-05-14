@@ -9,6 +9,7 @@ export interface RespondentState {
   navigate: (dir: Direction) => void
   setAnswer: (questionId: string, value: string) => void
   submitting: boolean
+  setSubmitting: (v: boolean) => void
 }
 
 export interface InitialRespondentState {
@@ -53,5 +54,6 @@ export function useRespondentState(
     navigate,
     setAnswer,
     submitting,
+    setSubmitting,
   }
 }

@@ -1,7 +1,7 @@
 'use client'
 
 import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { Form } from '@/types'
 import { useRespondentState } from '@/hooks/useRespondentState'
 import { clearProgress, loadProgress, saveProgress, type Stage } from '@/lib/formProgress'
@@ -59,8 +59,9 @@ export function FormPlayer({ form }: Props) {
   const [restored] = useState<RestoredState>(() => readInitial(form))
 
   const [stage, setStage] = useState<Stage>(restored.stage)
-  const { currentIndex, direction, answers, navigate, setAnswer, submitting } =
+  const { currentIndex, direction, answers, navigate, setAnswer, submitting, setSubmitting } =
     useRespondentState(questions.length, { index: restored.index, answers: restored.answers })
+  const inFlightRef = useRef(false)
   const [responseId, setResponseId] = useState<string | null>(restored.responseId)
   const [error, setError] = useState<string | null>(null)
 
@@ -97,24 +98,27 @@ export function FormPlayer({ form }: Props) {
 
   async function handleSubmit(overrideValue?: string) {
     if (!currentQuestion) return
-
-    if (currentQuestion.type === 'STATEMENT' || currentQuestion.type === 'WELCOME') {
-      const isLast = currentIndex === questions.length - 1
-      if (isLast) {
-        if (form.thankYouEnabled) setStage('done')
-      } else {
-        navigate('forward')
-      }
-      return
-    }
-
-    const effectiveValue = overrideValue ?? currentValue
-    if (currentQuestion.required && !effectiveValue.trim()) return
-
-    setError(null)
-    const isLast = currentIndex === questions.length - 1
+    if (inFlightRef.current) return
+    inFlightRef.current = true
 
     try {
+      if (currentQuestion.type === 'STATEMENT' || currentQuestion.type === 'WELCOME') {
+        const isLast = currentIndex === questions.length - 1
+        if (isLast) {
+          if (form.thankYouEnabled) setStage('done')
+        } else {
+          navigate('forward')
+        }
+        return
+      }
+
+      const effectiveValue = overrideValue ?? currentValue
+      if (currentQuestion.required && !effectiveValue.trim()) return
+
+      setError(null)
+      setSubmitting(true)
+      const isLast = currentIndex === questions.length - 1
+
       const token = getOrCreateToken()
       const body: Record<string, unknown> = {
         respondentToken: token,
@@ -140,6 +144,9 @@ export function FormPlayer({ form }: Props) {
       }
     } catch {
       setError('Something went wrong. Please try again.')
+    } finally {
+      inFlightRef.current = false
+      setSubmitting(false)
     }
   }
 
